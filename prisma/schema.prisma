@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  MANAGER
+  TICKER
+  ADMIN
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Gym {
+  id        String   @id @default(cuid())
+  name      String
+  location  String?
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  members   Member[]
+  plans     Plan[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(TICKER)
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id              String       @id @default(cuid())
+  memberId        Int          // Numeric ID unique per gym (e.g. 1001, 1002)
+  fullName        String
+  phoneNumber     String?
+  photoUrl        String?
+  age             Int?
+  gender          String?
+  status          MemberStatus @default(ACTIVE)
+  registrationDate DateTime     @default(now())
+  
+  gymId           String
+  gym             Gym          @relation(fields: [gymId], references: [id])
+  
+  currentPlanId   String?
+  currentPlan     Plan?        @relation(fields: [currentPlanId], references: [id])
+  
+  expiryDate      DateTime?
+  
+  attendances     Attendance[]
+  payments        Payment[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([gymId, memberId])
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  duration    Int      // Duration in days (e.g. 30 for 1 month)
+  price       Float
+  isActive    Boolean  @default(true)
+  
+  gymId       String
+  gym         Gym      @relation(fields: [gymId], references: [id])
+  
+  members     Member[]
+  payments    Payment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id])
+  
+  checkIn   DateTime @default(now())
+  
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   // Cash, Bank Transfer, etc.
+  notes         String?
+  
+  memberId      String
+  member        Member   @relation(fields: [memberId], references: [id])
+  
+  planId        String
+  plan          Plan     @relation(fields: [planId], references: [id])
+  
+  startDate     DateTime
+  expiryDate    DateTime
+
+  createdAt     DateTime @default(now())
+}

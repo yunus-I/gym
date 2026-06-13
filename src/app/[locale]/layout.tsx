@@ -1,0 +1,60 @@
+import type { Metadata } from "next";
+import { Inter, Noto_Sans_Ethiopic } from "next/font/google";
+import "../globals.css";
+import { routing } from "@/i18n/routing";
+import { notFound } from "next/navigation";
+import { Providers } from "@/components/Providers";
+import { getMessages } from "next-intl/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import Sidebar from "@/components/Sidebar";
+import type { Locale, IntlProviderMessages } from "@/types/app";
+
+export const metadata: Metadata = {
+  title: "Gym Pro Management",
+  description: "A professional gym management system for multiple locations.",
+};
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const notoSansEthiopic = Noto_Sans_Ethiopic({
+  subsets: ["ethiopic"],
+  variable: "--font-noto-ethiopic",
+});
+
+export default async function RootLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const session = await getServerSession(authOptions);
+
+  // Ensure that the incoming `locale` is valid
+  if (!routing.locales.includes(locale as Locale)) {
+    notFound();
+  }
+
+  const messages = (await getMessages()) as IntlProviderMessages;
+  const validatedLocale = locale as Locale;
+
+  return (
+    <html lang={validatedLocale} className={`h-full antialiased ${inter.variable} ${notoSansEthiopic.variable}`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-sans bg-slate-50 dark:bg-zinc-950">
+        <Providers messages={messages} locale={validatedLocale}>
+          <div className="flex min-h-screen">
+            {session && <Sidebar />}
+            <main className={`flex-1 transition-all duration-500 ${session ? 'lg:ml-80' : ''}`}>
+              {children}
+            </main>
+          </div>
+        </Providers>
+      </body>
+    </html>
+  );
+}

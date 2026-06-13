@@ -1,0 +1,125 @@
+{
+  "Index": {
+    "title": "Gym Management System",
+    "welcome": "Welcome to our Gym",
+    "description": "Professional management for your fitness house."
+  },
+  "Navigation": {
+    "home": "Home",
+    "members": "Members",
+    "checkIn": "Check-In",
+    "plans": "Plans",
+    "reports": "Reports",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "actions": "Actions"
+  },
+  "Auth": {
+    "signIn": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "forgotPassword": "Forgot Password?"
+  },
+  "Members": {
+    "title": "Members Directory",
+    "register": "Register Member",
+    "fullName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "age": "Age",
+    "gender": "Gender",
+    "plan": "Membership Plan",
+    "photo": "Profile Photo",
+    "submit": "Register Member",
+    "success": "Member registered successfully",
+    "error": "Failed to register member",
+    "id": "Member ID",
+    "status": "Status",
+    "male": "Male",
+    "female": "Female"
+  },
+  "CheckIn": {
+    "title": "Member Check-In",
+    "searchPlaceholder": "Search by Name or Member ID...",
+    "checkIn": "Check In",
+    "lastVisit": "Last Visit",
+    "active": "Active",
+    "expired": "Expired",
+    "expiringSoon": "Expiring Soon",
+    "notMember": "Member not found",
+    "alreadyCheckedIn": "Already checked in today",
+    "subscriptionExpired": "Subscription Expired!",
+    "success": "Check-in successful"
+  },
+  "Plans": {
+    "title": "Membership Plans",
+    "addPlan": "Create New Plan",
+    "name": "Plan Name",
+    "duration": "Duration (Days)",
+    "price": "Price (ETB)",
+    "status": "Active Status",
+    "save": "Save Plan",
+    "edit": "Edit Plan",
+    "noPlans": "No plans found. Create one to get started."
+  },
+  "Payments": {
+    "title": "Payments",
+    "record": "Record Payment",
+    "amount": "Amount Paid",
+    "method": "Payment Method",
+    "notes": "Notes",
+    "history": "Payment History",
+    "date": "Date",
+    "plan": "Plan",
+    "member": "Member",
+    "cash": "Cash",
+    "transfer": "Bank Transfer",
+    "other": "Other",
+    "success": "Payment recorded successfully"
+  },
+  "Reports": {
+    "title": "Reports & Analytics",
+    "attendance": "Attendance Report",
+    "financial": "Financial Report",
+    "revenue": "Total Revenue",
+    "totalCheckIns": "Total Check-Ins",
+    "planBreakdown": "Revenue by Plan",
+    "dailyTrend": "Daily Trend",
+    "export": "Export CSV",
+    "start": "Start Date",
+    "end": "End Date"
+  },
+  "Dashboard": {
+    "title": "Manager Dashboard",
+    "totalMembers": "Total Members",
+    "todayCheckIns": "Today's Check-ins",
+    "activeSubs": "Active Subscriptions",
+    "expiredSubs": "Expired Subscriptions",
+    "revenue": "Monthly Revenue",
+    "alerts": "Urgent Alerts",
+    "expiringSoon": "Members Expiring Soon",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions",
+    "viewAll": "View All",
+    "daysRemaining": "days left"
+  },
+  "Gym": {
+    "title": "Gym Profile",
+    "name": "Gym Name",
+    "location": "Location",
+    "logo": "Gym Logo",
+    "save": "Save Changes",
+    "success": "Profile updated successfully"
+  }
+}

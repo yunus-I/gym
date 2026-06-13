@@ -1,0 +1,125 @@
+{
+  "Index": {
+    "title": "የጂም ማኔጅመንት ሲስተም",
+    "welcome": "ወደ ጂማችን እንኳን ደህና መጡ",
+    "description": "ለአካል ብቃት ቤትዎ ሙያዊ አስተዳደር።"
+  },
+  "Navigation": {
+    "home": "መነሻ",
+    "members": "አባላት",
+    "checkIn": "መግቢያ",
+    "plans": "እቅዶች",
+    "reports": "ሪፖርቶች",
+    "dashboard": "ዳሽቦርድ",
+    "login": "ግባ",
+    "logout": "ውጣ"
+  },
+  "Common": {
+    "loading": "በመጫን ላይ...",
+    "error": "ስህተት ተከስቷል",
+    "success": "ተሳክቷል",
+    "save": "አስቀምጥ",
+    "cancel": "ሰርዝ",
+    "delete": "አጥፋ",
+    "edit": "አስተካክል",
+    "search": "ፈልግ",
+    "actions": "እርምጃዎች"
+  },
+  "Auth": {
+    "signIn": "ግባ",
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "role": "ሚና",
+    "forgotPassword": "የይለፍ ቃል ረስተዋል?"
+  },
+  "Members": {
+    "title": "የአባላት ዝርዝር",
+    "register": "አባል ይመዝግቡ",
+    "fullName": "ሙሉ ስም",
+    "phoneNumber": "ስልክ ቁጥር",
+    "age": "ዕድሜ",
+    "gender": "ጾታ",
+    "plan": "የአባልነት እቅድ",
+    "photo": "የመገለጫ ፎቶ",
+    "submit": "አባል ይመዝግቡ",
+    "success": "አባል በተሳካ ሁኔታ ተመዝግቧል",
+    "error": "አባል መመዝገብ አልተቻለም",
+    "id": "የአባል መታወቂያ",
+    "status": "ሁኔታ",
+    "male": "ወንድ",
+    "female": "ሴት"
+  },
+  "CheckIn": {
+    "title": "የአባል መግቢያ",
+    "searchPlaceholder": "በስም ወይም በአባል መታወቂያ ይፈልጉ...",
+    "checkIn": "መግቢያ",
+    "lastVisit": "የመጨረሻ ጉብኝት",
+    "active": "ንቁ",
+    "expired": "ጊዜው ያለፈበት",
+    "expiringSoon": "በቅርቡ የሚያበቃ",
+    "notMember": "አባል አልተገኘም",
+    "alreadyCheckedIn": "ዛሬ አስቀድመው ገብተዋል",
+    "subscriptionExpired": "የደንበኝነት ምዝገባው ጊዜው አልፎበታል!",
+    "success": "መግቢያ ተሳክቷል"
+  },
+  "Plans": {
+    "title": "የአባልነት እቅዶች",
+    "addPlan": "አዲስ እቅድ ይፍጠሩ",
+    "name": "የእቅድ ስም",
+    "duration": "ቆይታ (ቀናት)",
+    "price": "ዋጋ (ብር)",
+    "status": "የእንቅስቃሴ ሁኔታ",
+    "save": "እቅድ አስቀምጥ",
+    "edit": "እቅድ አስተካክል",
+    "noPlans": "ምንም እቅዶች አልተገኙም። ለመጀመር አንድ ይፍጠሩ።"
+  },
+  "Payments": {
+    "title": "ክፍያዎች",
+    "record": "ክፍያ መዝግብ",
+    "amount": "የተከፈለ መጠን",
+    "method": "የክፍያ ዘዴ",
+    "notes": "ማስታወሻዎች",
+    "history": "የክፍያ ታሪክ",
+    "date": "ቀን",
+    "plan": "እቅድ",
+    "member": "አባል",
+    "cash": "ጥሬ ገንዘብ",
+    "transfer": "የባንክ ዝውውር",
+    "other": "ሌላ",
+    "success": "ክፍያ በተሳካ ሁኔታ ተመዝግቧል"
+  },
+  "Reports": {
+    "title": "ሪፖርቶች እና ትንታኔዎች",
+    "attendance": "የመገኘት ሪፖርት",
+    "financial": "የፋይናንስ ሪፖርት",
+    "revenue": "ጠቅላላ ገቢ",
+    "totalCheckIns": "ጠቅላላ መግቢያዎች",
+    "planBreakdown": "ገቢ በዕቅድ",
+    "dailyTrend": "ዕለታዊ አዝማሚያ",
+    "export": "ወደ CSV ቀይር",
+    "start": "የመጀመሪያ ቀን",
+    "end": "የመጨረሻ ቀን"
+  },
+  "Dashboard": {
+    "title": "የስራ አስኪያጅ ዳሽቦርድ",
+    "totalMembers": "ጠቅላላ አባላት",
+    "todayCheckIns": "የዛሬ መግቢያዎች",
+    "activeSubs": "ንቁ ምዝገባዎች",
+    "expiredSubs": "ጊዜው ያለፈባቸው ምዝገባዎች",
+    "revenue": "የወር ገቢ",
+    "alerts": "አጣዳፊ ማንቂያዎች",
+    "expiringSoon": "በቅርቡ የሚያበቁ አባላት",
+    "recentActivity": "የቅርብ ጊዜ እንቅስቃሴ",
+    "quickActions": "ፈጣን እርምጃዎች",
+    "viewAll": "ሁሉንም ተመልከት",
+    "daysRemaining": "ቀናት ይቀራሉ"
+  },
+  "Gym": {
+    "title": "የጂም መገለጫ",
+    "name": "የጂም ስም",
+    "location": "አድራሻ",
+    "logo": "የጂም አርማ",
+    "save": "ለውጦችን አስቀምጥ",
+    "success": "መገለጫው በተሳካ ሁኔታ ተዘምኗል"
+  }
+}
