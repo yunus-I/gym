@@ -119,7 +119,7 @@ export default function GymProfilePage() {
                 <Building2 className="w-12 h-12" />
               </AvatarFallback>
             </Avatar>
-            <p className="text-xs text-slate-400 px-4">This logo will appear on member profiles and reports.</p>
+            <p className="text-xs text-slate-400 px-4">This logo will appear on member profiles throughout the app.</p>
             <Input 
               type="file"
               name="logoFile" 

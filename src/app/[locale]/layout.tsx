@@ -8,10 +8,12 @@ import { getMessages } from "next-intl/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Sidebar from "@/components/Sidebar";
+import TopBar from "@/components/TopBar";
+import { MobileMenuProvider } from "@/components/MobileMenuContext";
 import type { Locale, IntlProviderMessages } from "@/types/app";
 
 export const metadata: Metadata = {
-  title: "Gym Pro Management",
+  title: "Gym OS Management",
   description: "A professional gym management system for multiple locations.",
 };
 
@@ -45,14 +47,19 @@ export default async function RootLayout({
 
   return (
     <html lang={validatedLocale} className={`h-full antialiased ${inter.variable} ${notoSansEthiopic.variable}`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 dark:bg-zinc-950">
+      <body className="min-h-full flex flex-col font-sans bg-[#0F1117] text-[#F1F5F9]">
         <Providers messages={messages} locale={validatedLocale}>
-          <div className="flex min-h-screen">
-            {session && <Sidebar />}
-            <main className={`flex-1 transition-all duration-500 ${session ? 'lg:ml-80' : ''}`}>
-              {children}
-            </main>
-          </div>
+          <MobileMenuProvider>
+            <div className="flex flex-col min-h-screen">
+              {session && <TopBar />}
+              <div className="flex flex-1">
+                {session && <Sidebar />}
+                <main className={`flex-1 transition-all duration-300 min-h-screen bg-[#0F1117] ${session ? 'pt-[56px] p-6' : ''}`}>
+                  {children}
+                </main>
+              </div>
+            </div>
+          </MobileMenuProvider>
         </Providers>
       </body>
     </html>

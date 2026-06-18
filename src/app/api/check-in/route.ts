@@ -10,12 +10,12 @@ export async function GET(req: Request) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get("query");
+    const query = searchParams.get("query")?.trim();
     const { gymId } = session.user;
 
     if (!query) return NextResponse.json([]);
 
-    const orConditions: any[] = [
+    const orConditions: { fullName?: { contains: string }; memberId?: number }[] = [
       { fullName: { contains: query } },
     ];
 
@@ -23,25 +23,61 @@ export async function GET(req: Request) {
       orConditions.push({ memberId: parseInt(query) });
     }
 
-    // Search by name or memberId
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
     const members = await prisma.member.findMany({
       where: {
         gymId,
         OR: orConditions,
       },
-      include: {
+      select: {
+        id: true,
+        memberId: true,
+        fullName: true,
+        phoneNumber: true,
+        photoUrl: true,
+        age: true,
+        gender: true,
+        status: true,
+        expiryDate: true,
+        registrationDate: true,
+        currentPlan: {
+          select: { name: true, duration: true, price: true },
+        },
         attendances: {
           orderBy: { checkIn: "desc" },
           take: 1,
+          select: { id: true, checkIn: true },
         },
       },
-      take: 5,
+      take: 8,
     });
 
-    return NextResponse.json(members);
-  } catch (error: any) {
+    const memberIds = members.map((m) => m.id);
+    const todayAttendances = await prisma.attendance.findMany({
+      where: {
+        memberId: { in: memberIds },
+        checkIn: { gte: todayStart, lte: todayEnd },
+      },
+      select: { memberId: true, checkIn: true },
+    });
+
+    const checkedInTodayMap = new Map(
+      todayAttendances.map((a) => [a.memberId, a.checkIn])
+    );
+
+    const results = members.map((member) => ({
+      ...member,
+      checkedInToday: checkedInTodayMap.has(member.id),
+      todayCheckInTime: checkedInTodayMap.get(member.id) ?? null,
+    }));
+
+    return NextResponse.json(results);
+  } catch (error: unknown) {
     console.error("GET /api/check-in error:", error);
-    return NextResponse.json({ error: "Internal Server Error", message: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: "Internal Server Error", message }, { status: 500 });
   }
 }
 
@@ -56,8 +92,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Member is required" }, { status: 400 });
     }
 
-    // 1. Check if member already checked in today
+    const { gymId } = session.user;
+
+    const member = await prisma.member.findFirst({
+      where: { id: memberId, gymId },
+      select: { id: true, expiryDate: true, fullName: true },
+    });
+
+    if (!member) {
+      return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    }
+
     const today = new Date();
+    if (!member.expiryDate || member.expiryDate < startOfDay(today)) {
+      return NextResponse.json({ error: "Subscription expired" }, { status: 400 });
+    }
+
     const existingAttendance = await prisma.attendance.findFirst({
       where: {
         memberId,
@@ -72,11 +122,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Already checked in today" }, { status: 400 });
     }
 
-    // 2. Record Attendance
     const attendance = await prisma.attendance.create({
-      data: {
-        memberId,
-      },
+      data: { memberId },
     });
 
     return NextResponse.json(attendance);

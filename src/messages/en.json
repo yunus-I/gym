@@ -1,18 +1,17 @@
 {
   "Index": {
-    "title": "Gym Management System",
-    "welcome": "Welcome to our Gym",
-    "description": "Professional management for your fitness house."
+    "title": "Gym Management",
+    "description": "Manage members, check-ins, and payments in one place."
   },
   "Navigation": {
     "home": "Home",
     "members": "Members",
     "checkIn": "Check-In",
     "plans": "Plans",
-    "reports": "Reports",
     "dashboard": "Dashboard",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "payments": "Payments"
   },
   "Common": {
     "loading": "Loading...",
@@ -50,17 +49,21 @@
     "female": "Female"
   },
   "CheckIn": {
-    "title": "Member Check-In",
-    "searchPlaceholder": "Search by Name or Member ID...",
+    "title": "Check-In Session",
+    "subtitle": "Search by member name or ID number to check in.",
+    "searchPlaceholder": "Search by name or member ID...",
     "checkIn": "Check In",
     "lastVisit": "Last Visit",
+    "expiryDate": "Expiry Date",
     "active": "Active",
     "expired": "Expired",
     "expiringSoon": "Expiring Soon",
     "notMember": "Member not found",
     "alreadyCheckedIn": "Already checked in today",
-    "subscriptionExpired": "Subscription Expired!",
-    "success": "Check-in successful"
+    "checkedInToday": "Checked in",
+    "subscriptionExpired": "Subscription expired — renew plan to check in.",
+    "success": "Check-in successful",
+    "status": "Status"
   },
   "Plans": {
     "title": "Membership Plans",
@@ -87,18 +90,6 @@
     "transfer": "Bank Transfer",
     "other": "Other",
     "success": "Payment recorded successfully"
-  },
-  "Reports": {
-    "title": "Reports & Analytics",
-    "attendance": "Attendance Report",
-    "financial": "Financial Report",
-    "revenue": "Total Revenue",
-    "totalCheckIns": "Total Check-Ins",
-    "planBreakdown": "Revenue by Plan",
-    "dailyTrend": "Daily Trend",
-    "export": "Export CSV",
-    "start": "Start Date",
-    "end": "End Date"
   },
   "Dashboard": {
     "title": "Manager Dashboard",

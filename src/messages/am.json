@@ -1,18 +1,17 @@
 {
   "Index": {
-    "title": "የጂም ማኔጅመንት ሲስተም",
-    "welcome": "ወደ ጂማችን እንኳን ደህና መጡ",
-    "description": "ለአካል ብቃት ቤትዎ ሙያዊ አስተዳደር።"
+    "title": "የጂም አስተዳደር",
+    "description": "አባላትን፣ መግቢያዎችን እና ክፍያዎችን በአንድ ቦታ ያስተዳድሩ።"
   },
   "Navigation": {
     "home": "መነሻ",
     "members": "አባላት",
     "checkIn": "መግቢያ",
     "plans": "እቅዶች",
-    "reports": "ሪፖርቶች",
     "dashboard": "ዳሽቦርድ",
     "login": "ግባ",
-    "logout": "ውጣ"
+    "logout": "ውጣ",
+    "payments": "ክፍያዎች"
   },
   "Common": {
     "loading": "በመጫን ላይ...",
@@ -50,17 +49,21 @@
     "female": "ሴት"
   },
   "CheckIn": {
-    "title": "የአባል መግቢያ",
+    "title": "የመግቢያ ክፍለ ጊዜ",
+    "subtitle": "ለመግባት በአባል ስም ወይም በመታወቂያ ቁጥር ይፈልጉ።",
     "searchPlaceholder": "በስም ወይም በአባል መታወቂያ ይፈልጉ...",
     "checkIn": "መግቢያ",
     "lastVisit": "የመጨረሻ ጉብኝት",
+    "expiryDate": "የማለቂያ ቀን",
     "active": "ንቁ",
     "expired": "ጊዜው ያለፈበት",
     "expiringSoon": "በቅርቡ የሚያበቃ",
     "notMember": "አባል አልተገኘም",
     "alreadyCheckedIn": "ዛሬ አስቀድመው ገብተዋል",
-    "subscriptionExpired": "የደንበኝነት ምዝገባው ጊዜው አልፎበታል!",
-    "success": "መግቢያ ተሳክቷል"
+    "checkedInToday": "ገብተዋል",
+    "subscriptionExpired": "የደንበኝነት ጊዜ አልፎበታል — ለመግባት እቅድ ያድሱ።",
+    "success": "መግቢያ ተሳክቷል",
+    "status": "ሁኔታ"
   },
   "Plans": {
     "title": "የአባልነት እቅዶች",
@@ -87,18 +90,6 @@
     "transfer": "የባንክ ዝውውር",
     "other": "ሌላ",
     "success": "ክፍያ በተሳካ ሁኔታ ተመዝግቧል"
-  },
-  "Reports": {
-    "title": "ሪፖርቶች እና ትንታኔዎች",
-    "attendance": "የመገኘት ሪፖርት",
-    "financial": "የፋይናንስ ሪፖርት",
-    "revenue": "ጠቅላላ ገቢ",
-    "totalCheckIns": "ጠቅላላ መግቢያዎች",
-    "planBreakdown": "ገቢ በዕቅድ",
-    "dailyTrend": "ዕለታዊ አዝማሚያ",
-    "export": "ወደ CSV ቀይር",
-    "start": "የመጀመሪያ ቀን",
-    "end": "የመጨረሻ ቀን"
   },
   "Dashboard": {
     "title": "የስራ አስኪያጅ ዳሽቦርድ",

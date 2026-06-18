@@ -39,7 +39,6 @@ export function isManagerOnlyPath(pathname: string): boolean {
     "/dashboard",
     "/members/register",
     "/plans",
-    "/reports",
     "/settings/gym",
   ].some((path) => normalizedPath === path || normalizedPath.startsWith(`${path}/`));
 }

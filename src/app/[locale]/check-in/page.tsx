@@ -2,11 +2,23 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, CheckCircle2, AlertCircle, Clock, User, Loader2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Search,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  User,
+  Loader2,
+  Phone,
+  Calendar,
+  CreditCard,
+  Hash,
+} from "lucide-react";
 import { format } from "date-fns";
 
 interface AttendanceSummary {
@@ -14,62 +26,73 @@ interface AttendanceSummary {
   checkIn: string;
 }
 
+interface PlanSummary {
+  name: string;
+  duration: number;
+  price: number;
+}
+
 interface CheckInMember {
   id: string;
   memberId: number;
   fullName: string;
+  phoneNumber: string | null;
   photoUrl: string | null;
+  age: number | null;
+  gender: string | null;
+  status: string;
   expiryDate: string | null;
-  attendances?: AttendanceSummary[];
+  registrationDate: string;
+  currentPlan: PlanSummary | null;
+  attendances: AttendanceSummary[];
+  checkedInToday: boolean;
+  todayCheckInTime: string | null;
 }
 
 export default function CheckInPage() {
   const t = useTranslations("CheckIn");
+  const membersT = useTranslations("Members");
   const common = useTranslations("Common");
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CheckInMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<CheckInMember | null>(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const searchMembers = useCallback(async (val: string) => {
-    if (val.length < 2) {
+    const trimmed = val.trim();
+    const isNumeric = /^\d+$/.test(trimmed);
+    if ((!isNumeric && trimmed.length < 2) || (isNumeric && trimmed.length < 1)) {
       setResults([]);
       return;
     }
+
+    setSearching(true);
     try {
-      const res = await fetch(`/api/check-in?query=${encodeURIComponent(val)}`);
-      
+      const res = await fetch(`/api/check-in?query=${encodeURIComponent(trimmed)}`);
       if (!res.ok) {
-        console.error("API Error:", res.status, res.statusText);
         setResults([]);
         return;
       }
-
-      const text = await res.text();
-      if (!text) {
-        setResults([]);
-        return;
-      }
-
-      const data = JSON.parse(text) as CheckInMember[];
+      const data = (await res.json()) as CheckInMember[];
       setResults(data);
-    } catch (e) {
-      console.error("Failed to parse check-in data:", e);
+    } catch {
       setResults([]);
+    } finally {
+      setSearching(false);
     }
   }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      searchMembers(query);
+      void searchMembers(query);
     }, 300);
     return () => clearTimeout(timer);
   }, [query, searchMembers]);
 
-  const handleCheckIn = async () => {
-    if (!selectedMember) return;
+  const performCheckIn = async (memberId: string) => {
     setLoading(true);
     setMessage(null);
 
@@ -77,169 +100,261 @@ export default function CheckInPage() {
       const res = await fetch("/api/check-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memberId: selectedMember.id }),
+        body: JSON.stringify({ memberId }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as { error?: string };
 
       if (res.ok) {
-        setMessage({ type: 'success', text: t("success") });
+        setMessage({ type: "success", text: t("success") });
         setSelectedMember(null);
         setQuery("");
+        setResults([]);
+      } else if (data.error === "Already checked in today") {
+        setMessage({ type: "error", text: t("alreadyCheckedIn") });
+      } else if (data.error === "Subscription expired") {
+        setMessage({ type: "error", text: t("subscriptionExpired") });
       } else {
-        setMessage({ type: 'error', text: data.error === "Already checked in today" ? t("alreadyCheckedIn") : t("subscriptionExpired") });
+        setMessage({ type: "error", text: common("error") });
       }
     } catch {
-      setMessage({ type: 'error', text: common("error") });
+      setMessage({ type: "error", text: common("error") });
     } finally {
       setLoading(false);
     }
   };
 
-  const currentTime = new Date();
+  const handleCheckIn = async () => {
+    if (!selectedMember) return;
+    await performCheckIn(selectedMember.id);
+  };
+
+  const selectMember = (member: CheckInMember) => {
+    setSelectedMember(member);
+    setResults([]);
+    setQuery("");
+    setMessage(null);
+  };
+
   const isExpired = Boolean(
-    selectedMember?.expiryDate && new Date(selectedMember.expiryDate) < new Date()
+    selectedMember && (!selectedMember.expiryDate || new Date(selectedMember.expiryDate) < new Date())
   );
   const isExpiringSoon = Boolean(
     selectedMember?.expiryDate &&
       new Date(selectedMember.expiryDate) > new Date() &&
-      new Date(selectedMember.expiryDate) < new Date(currentTime.getTime() + 5 * 24 * 60 * 60 * 1000)
+      new Date(selectedMember.expiryDate) < new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
   );
+  const canCheckIn = selectedMember && !isExpired && !selectedMember.checkedInToday;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 p-6 flex flex-col items-center">
-      <div className="w-full max-w-2xl space-y-8 mt-12">
-        <div className="text-center">
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-            {t("title")}
-          </h1>
-          <p className="text-slate-500 dark:text-zinc-400">
-            Quickly check in members by name or ID.
-          </p>
-        </div>
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-xl font-bold text-[#F1F5F9] tracking-tight">{t("title")}</h1>
+        <p className="text-xs text-[#94A3B8] mt-0.5">{t("subtitle")}</p>
+      </div>
 
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-            <Search className="w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-          </div>
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="h-16 pl-14 pr-6 rounded-[2rem] border-none shadow-2xl shadow-indigo-500/10 bg-white dark:bg-zinc-900 text-lg focus:ring-2 focus:ring-indigo-500 transition-all"
-          />
-          
-          {results.length > 0 && !selectedMember && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800 overflow-hidden z-50">
-              {results.map((member) => (
-                <div
-                  key={member.id}
-                  onClick={() => {
-                    setSelectedMember(member);
-                    setResults([]);
-                    setQuery("");
-                  }}
-                  className="p-4 hover:bg-slate-50 dark:hover:bg-zinc-800 cursor-pointer flex items-center gap-4 transition-colors border-b border-slate-50 dark:border-zinc-800 last:border-none"
-                >
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={member.photoUrl ?? undefined} />
-                    <AvatarFallback><User /></AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold text-slate-900 dark:text-white">{member.fullName}</p>
-                    <p className="text-xs text-slate-500 dark:text-zinc-500">ID: {member.memberId}</p>
-                  </div>
+      <div className="relative">
+        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#94A3B8]">
+          {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+        </span>
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (selectedMember) {
+                void handleCheckIn();
+              } else if (results.length > 0) {
+                void performCheckIn(results[0].id);
+              }
+            }
+          }}
+          placeholder={t("searchPlaceholder")}
+          className="h-11 pl-10 pr-4 text-sm bg-[#1E2535] border border-[#2A3347] rounded-lg text-[#F1F5F9] placeholder-[#64748B] focus:border-[#22C55E] focus:outline-none"
+        />
+
+        {results.length > 0 && !selectedMember && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E2535] rounded-xl border border-[#2A3347] overflow-hidden z-50 shadow-xl">
+            {results.map((member) => (
+              <button
+                key={member.id}
+                type="button"
+                onClick={() => selectMember(member)}
+                className="w-full p-3 hover:bg-[#2A3347] flex items-center gap-3 transition-colors border-none cursor-pointer border-b border-[#2A3347] last:border-none text-left"
+              >
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={member.photoUrl ?? undefined} />
+                  <AvatarFallback className="bg-[#161B27] text-[#22C55E]">
+                    <User className="w-4 h-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-[#F1F5F9] truncate">{member.fullName}</p>
+                  <p className="text-xs text-[#64748B]">ID: {member.memberId}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {message && (
-          <div className={`p-6 rounded-3xl flex items-center gap-4 animate-in slide-in-from-top-4 duration-300 ${
-            message.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30'
-          }`}>
-            {message.type === 'success' ? <CheckCircle2 /> : <AlertCircle />}
-            <span className="font-bold">{message.text}</span>
-          </div>
-        )}
-
-        {selectedMember && (
-          <Card className="rounded-[3rem] border-none shadow-2xl shadow-indigo-500/10 bg-white dark:bg-zinc-900 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-            <CardContent className="p-10">
-              <div className="flex flex-col items-center text-center space-y-6">
-                <div className="relative">
-                  <Avatar className="w-40 h-40 border-8 border-slate-50 dark:border-zinc-800 shadow-xl">
-                    <AvatarImage src={selectedMember.photoUrl ?? undefined} />
-                    <AvatarFallback className="bg-slate-100 dark:bg-zinc-800 text-slate-400">
-                      <User className="w-16 h-16" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className={`absolute bottom-2 right-2 w-10 h-10 rounded-full flex items-center justify-center border-4 border-white dark:border-zinc-900 shadow-lg ${
-                    isExpired ? 'bg-rose-500' : isExpiringSoon ? 'bg-amber-500' : 'bg-emerald-500'
-                  }`}>
-                    {isExpired ? <AlertCircle className="w-5 h-5 text-white" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-3xl font-black text-slate-900 dark:text-white">{selectedMember.fullName}</h2>
-                  <p className="text-indigo-600 dark:text-indigo-400 font-bold tracking-widest uppercase text-xs mt-1">
-                    Member ID: {selectedMember.memberId}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 w-full">
-                  <div className="bg-slate-50 dark:bg-zinc-800/50 p-4 rounded-2xl">
-                    <p className="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">{t("status")}</p>
-                    <p className={`font-bold ${isExpired ? 'text-rose-600' : isExpiringSoon ? 'text-amber-600' : 'text-emerald-600'}`}>
-                      {isExpired ? t("expired") : isExpiringSoon ? t("expiringSoon") : t("active")}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-zinc-800/50 p-4 rounded-2xl">
-                    <p className="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Expiry Date</p>
-                    <p className="font-bold text-slate-900 dark:text-white">
-                      {selectedMember.expiryDate ? format(new Date(selectedMember.expiryDate), 'MMM dd, yyyy') : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedMember.attendances?.[0] && (
-                   <div className="flex items-center gap-2 text-slate-400 dark:text-zinc-500 text-sm">
-                     <Clock className="w-4 h-4" />
-                     <span>{t("lastVisit")}: {format(new Date(selectedMember.attendances[0].checkIn), 'MMM dd, HH:mm')}</span>
-                   </div>
+                {member.checkedInToday && (
+                  <span className="text-[10px] font-bold text-[#22C55E] bg-[#14532D] px-2 py-0.5 rounded-full shrink-0">
+                    {t("checkedInToday")}
+                  </span>
                 )}
-
-                <div className="flex gap-4 w-full pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => { setSelectedMember(null); setQuery(""); }}
-                    className="flex-1 h-16 rounded-2xl border-slate-200 dark:border-zinc-800 font-bold"
-                  >
-                    {common("cancel")}
-                  </Button>
-                  <Button
-                    disabled={loading || isExpired}
-                    onClick={handleCheckIn}
-                    className={`flex-[2] h-16 rounded-2xl font-black text-xl shadow-lg transition-all transform active:scale-95 ${
-                      isExpired ? 'bg-slate-200 dark:bg-zinc-800 text-slate-400' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/25'
-                    }`}
-                  >
-                    {loading ? <Loader2 className="animate-spin" /> : t("checkIn")}
-                  </Button>
-                </div>
-                
-                {isExpired && (
-                  <p className="text-rose-500 font-bold text-sm animate-pulse">
-                    {t("subscriptionExpired")} Renew plan to check in.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </button>
+            ))}
+          </div>
         )}
       </div>
+
+      {message && (
+        <div
+          className={`p-4 rounded-xl flex items-center gap-3 text-sm font-semibold ${
+            message.type === "success"
+              ? "bg-[#14532D]/40 text-[#22C55E] border border-[#22C55E]/30"
+              : "bg-[#7F1D1D]/40 text-[#EF4444] border border-[#EF4444]/30"
+          }`}
+        >
+          {message.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+          {message.text}
+        </div>
+      )}
+
+      {selectedMember && (
+        <Card className="bg-[#1E2535] border border-[#2A3347] rounded-xl overflow-hidden">
+          <div className="p-6 space-y-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-4">
+                <Avatar className="w-24 h-24 ring-2 ring-[#2A3347]">
+                  <AvatarImage src={selectedMember.photoUrl ?? undefined} />
+                  <AvatarFallback className="bg-[#161B27] text-[#22C55E]">
+                    <User className="w-10 h-10" />
+                  </AvatarFallback>
+                </Avatar>
+                <div
+                  className={`absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center border-2 border-[#1E2535] ${
+                    isExpired ? "bg-[#EF4444]" : isExpiringSoon ? "bg-[#F97316]" : "bg-[#22C55E]"
+                  }`}
+                >
+                  {isExpired ? (
+                    <AlertCircle className="w-3.5 h-3.5 text-white" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  )}
+                </div>
+              </div>
+
+              <h2 className="text-xl font-bold text-[#F1F5F9]">{selectedMember.fullName}</h2>
+              <p className="text-xs text-[#64748B] font-mono mt-1">#{selectedMember.memberId}</p>
+
+              {selectedMember.checkedInToday && (
+                <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#22C55E] bg-[#14532D] px-3 py-1 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {t("alreadyCheckedIn")} — {selectedMember.todayCheckInTime && format(new Date(selectedMember.todayCheckInTime), "HH:mm")}
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <InfoItem icon={Hash} label={membersT("id")} value={`#${selectedMember.memberId}`} />
+              <InfoItem icon={Phone} label={membersT("phoneNumber")} value={selectedMember.phoneNumber ?? "—"} />
+              <InfoItem icon={User} label={membersT("age")} value={selectedMember.age?.toString() ?? "—"} />
+              <InfoItem icon={User} label={membersT("gender")} value={selectedMember.gender ?? "—"} />
+              <InfoItem
+                icon={CreditCard}
+                label={membersT("plan")}
+                value={selectedMember.currentPlan?.name ?? "—"}
+              />
+              <InfoItem
+                icon={Calendar}
+                label={t("expiryDate")}
+                value={
+                  selectedMember.expiryDate
+                    ? format(new Date(selectedMember.expiryDate), "MMM dd, yyyy")
+                    : "—"
+                }
+              />
+              <InfoItem
+                icon={CheckCircle2}
+                label={t("status")}
+                value={isExpired ? t("expired") : isExpiringSoon ? t("expiringSoon") : t("active")}
+                highlight={isExpired ? "danger" : isExpiringSoon ? "warning" : "success"}
+              />
+              <InfoItem
+                icon={Clock}
+                label={t("lastVisit")}
+                value={
+                  selectedMember.attendances[0]
+                    ? format(new Date(selectedMember.attendances[0].checkIn), "MMM dd, HH:mm")
+                    : "—"
+                }
+              />
+            </div>
+
+            {selectedMember.currentPlan && (
+              <div className="text-xs text-[#94A3B8] p-3 rounded-lg bg-[#161B27] border border-[#2A3347]">
+                {selectedMember.currentPlan.name} — {selectedMember.currentPlan.duration} days —{" "}
+                {selectedMember.currentPlan.price.toLocaleString()} ETB
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedMember(null);
+                  setQuery("");
+                }}
+                className="flex-1 h-11 rounded-lg border-[#2A3347] bg-transparent text-[#CBD5E1] hover:bg-[#2A3347] font-semibold text-sm"
+              >
+                {common("cancel")}
+              </Button>
+              <Button
+                disabled={loading || !canCheckIn}
+                onClick={handleCheckIn}
+                className={`flex-[2] h-11 rounded-lg font-bold text-sm border-none ${
+                  canCheckIn
+                    ? "bg-[#22C55E] hover:bg-[#1ea850] text-[#0F1117]"
+                    : "bg-[#2A3347] text-[#64748B] cursor-not-allowed"
+                }`}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("checkIn")}
+              </Button>
+            </div>
+
+            {isExpired && (
+              <p className="text-[#EF4444] text-xs font-semibold text-center">{t("subscriptionExpired")}</p>
+            )}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function InfoItem({
+  icon: Icon,
+  label,
+  value,
+  highlight,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  highlight?: "success" | "warning" | "danger";
+}) {
+  const valueColor =
+    highlight === "danger"
+      ? "text-[#EF4444]"
+      : highlight === "warning"
+        ? "text-[#F97316]"
+        : highlight === "success"
+          ? "text-[#22C55E]"
+          : "text-[#F1F5F9]";
+
+  return (
+    <div className="bg-[#161B27] p-3 rounded-lg border border-[#2A3347]">
+      <div className="flex items-center gap-1.5 mb-1">
+        <Icon className="w-3 h-3 text-[#64748B]" />
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">{label}</p>
+      </div>
+      <p className={`text-sm font-semibold truncate ${valueColor}`}>{value}</p>
     </div>
   );
 }

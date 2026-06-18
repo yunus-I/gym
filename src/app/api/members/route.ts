@@ -97,6 +97,7 @@ export async function GET() {
 
   const members = await prisma.member.findMany({
     where: { gymId },
+    include: { currentPlan: true },
     orderBy: { fullName: "asc" },
   });
 

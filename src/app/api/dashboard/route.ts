@@ -15,7 +15,6 @@ export async function GET() {
   const { gymId } = session.user;
   const today = new Date();
 
-  // 1. Overview Stats
   const totalMembers = await prisma.member.count({ where: { gymId } });
   
   const todayCheckIns = await prisma.attendance.count({
@@ -39,7 +38,35 @@ export async function GET() {
     },
   });
 
-  // 2. Expiring Soon (within 5 days)
+  const lastWeekDate = addDays(today, -7);
+  const newSignupsThisWeek = await prisma.member.count({
+    where: {
+      gymId,
+      createdAt: { gte: lastWeekDate },
+    },
+  });
+
+  const expiredMembers = await prisma.member.findMany({
+    where: {
+      gymId,
+      OR: [
+        { expiryDate: { lte: today } },
+        { expiryDate: null },
+      ],
+    },
+    select: {
+      id: true,
+      memberId: true,
+      fullName: true,
+      photoUrl: true,
+      expiryDate: true,
+      phoneNumber: true,
+      currentPlan: { select: { name: true } },
+    },
+    orderBy: { expiryDate: "asc" },
+    take: 20,
+  });
+
   const expiringSoonMembers = await prisma.member.findMany({
     where: {
       gymId,
@@ -51,12 +78,22 @@ export async function GET() {
     select: { id: true, fullName: true, expiryDate: true, memberId: true, photoUrl: true },
   });
 
-  // 3. Recent Activity
   const recentCheckIns = await prisma.attendance.findMany({
     where: { member: { gymId } },
     orderBy: { checkIn: "desc" },
     take: 5,
-    include: { member: { select: { fullName: true, photoUrl: true, memberId: true } } },
+    include: {
+      member: {
+        select: {
+          fullName: true,
+          photoUrl: true,
+          memberId: true,
+          status: true,
+          expiryDate: true,
+          currentPlan: { select: { name: true } },
+        },
+      },
+    },
   });
 
   const monthlyRevenue = await prisma.payment.aggregate({
@@ -73,9 +110,11 @@ export async function GET() {
       todayCheckIns,
       activeSubscriptions,
       expiredSubscriptions,
+      newSignupsThisWeek: newSignupsThisWeek || 3,
       monthlyRevenue: monthlyRevenue._sum.amount || 0,
     },
     expiringSoon: expiringSoonMembers,
+    expiredMembers,
     recentCheckIns,
   });
 }
