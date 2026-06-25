@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { LucideIcon } from "lucide-react";
@@ -147,17 +146,18 @@ export default function CheckInPage() {
   const canCheckIn = selectedMember && !isExpired && !selectedMember.checkedInToday;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-8 pb-12">
       <div>
-        <h1 className="text-xl font-bold text-[#F1F5F9] tracking-tight">{t("title")}</h1>
-        <p className="text-xs text-[#94A3B8] mt-0.5">{t("subtitle")}</p>
+        <span className="text-[10px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FF6B00]/10 px-2.5 py-1 rounded">Check-in Terminal</span>
+        <h1 className="text-3xl font-black text-white mt-3 uppercase tracking-tight leading-none">{t("title")}</h1>
+        <p className="text-zinc-400 text-xs mt-2 font-medium">{t("subtitle")}</p>
       </div>
 
       <div className="relative">
-        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#94A3B8]">
-          {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+        <span className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-zinc-500">
+          {searching ? <Loader2 className="w-5 h-5 animate-spin text-[#FF6B00]" /> : <Search className="w-5 h-5" />}
         </span>
-        <Input
+        <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
@@ -170,30 +170,30 @@ export default function CheckInPage() {
             }
           }}
           placeholder={t("searchPlaceholder")}
-          className="h-11 pl-10 pr-4 text-sm bg-[#1E2535] border border-[#2A3347] rounded-lg text-[#F1F5F9] placeholder-[#64748B] focus:border-[#22C55E] focus:outline-none"
+          className="w-full h-12 pl-12 pr-4 text-sm bg-[#151515] border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
         />
 
         {results.length > 0 && !selectedMember && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E2535] rounded-xl border border-[#2A3347] overflow-hidden z-50 shadow-xl">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#151515]/95 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden z-50 shadow-2xl divide-y divide-white/5">
             {results.map((member) => (
               <button
                 key={member.id}
                 type="button"
                 onClick={() => selectMember(member)}
-                className="w-full p-3 hover:bg-[#2A3347] flex items-center gap-3 transition-colors border-none cursor-pointer border-b border-[#2A3347] last:border-none text-left"
+                className="w-full p-3.5 hover:bg-white/5 flex items-center gap-3.5 transition-colors border-none cursor-pointer text-left"
               >
-                <Avatar className="w-10 h-10">
+                <Avatar className="w-10 h-10 ring-1 ring-white/10">
                   <AvatarImage src={member.photoUrl ?? undefined} />
-                  <AvatarFallback className="bg-[#161B27] text-[#22C55E]">
-                    <User className="w-4 h-4" />
+                  <AvatarFallback className="bg-[#090909] text-[#FF6B00] font-black text-xs">
+                    {member.fullName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#F1F5F9] truncate">{member.fullName}</p>
-                  <p className="text-xs text-[#64748B]">ID: {member.memberId}</p>
+                  <p className="text-xs font-bold text-white truncate leading-none">{member.fullName}</p>
+                  <p className="text-[10px] text-zinc-500 mt-1 font-semibold">ID: #{member.memberId}</p>
                 </div>
                 {member.checkedInToday && (
-                  <span className="text-[10px] font-bold text-[#22C55E] bg-[#14532D] px-2 py-0.5 rounded-full shrink-0">
+                  <span className="text-[9px] font-black text-[#00FF88] bg-[#00FF88]/10 px-2 py-0.5 rounded uppercase tracking-wider">
                     {t("checkedInToday")}
                   </span>
                 )}
@@ -205,10 +205,10 @@ export default function CheckInPage() {
 
       {message && (
         <div
-          className={`p-4 rounded-xl flex items-center gap-3 text-sm font-semibold ${
+          className={`p-4 rounded-xl flex items-center gap-3.5 text-xs font-bold uppercase tracking-wider ${
             message.type === "success"
-              ? "bg-[#14532D]/40 text-[#22C55E] border border-[#22C55E]/30"
-              : "bg-[#7F1D1D]/40 text-[#EF4444] border border-[#EF4444]/30"
+              ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 animate-pulse"
+              : "bg-red-500/10 text-red-500 border border-red-500/20"
           }`}
         >
           {message.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
@@ -217,41 +217,43 @@ export default function CheckInPage() {
       )}
 
       {selectedMember && (
-        <Card className="bg-[#1E2535] border border-[#2A3347] rounded-xl overflow-hidden">
+        <Card className="bg-[#151515] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FF6B00] to-[#FF8C39]" />
+          
           <div className="p-6 space-y-6">
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-4">
-                <Avatar className="w-24 h-24 ring-2 ring-[#2A3347]">
+                <Avatar className="w-24 h-24 ring-2 ring-white/10">
                   <AvatarImage src={selectedMember.photoUrl ?? undefined} />
-                  <AvatarFallback className="bg-[#161B27] text-[#22C55E]">
-                    <User className="w-10 h-10" />
+                  <AvatarFallback className="bg-[#090909] text-[#FF6B00] text-lg font-black">
+                    {selectedMember.fullName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div
-                  className={`absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center border-2 border-[#1E2535] ${
-                    isExpired ? "bg-[#EF4444]" : isExpiringSoon ? "bg-[#F97316]" : "bg-[#22C55E]"
+                  className={`absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center border-2 border-[#151515] ${
+                    isExpired ? "bg-red-500" : isExpiringSoon ? "bg-[#FF6B00]" : "bg-[#00FF88]"
                   }`}
                 >
                   {isExpired ? (
-                    <AlertCircle className="w-3.5 h-3.5 text-white" />
+                    <AlertCircle className="w-4 h-4 text-white" />
                   ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    <CheckCircle2 className="w-4 h-4 text-black" />
                   )}
                 </div>
               </div>
 
-              <h2 className="text-xl font-bold text-[#F1F5F9]">{selectedMember.fullName}</h2>
-              <p className="text-xs text-[#64748B] font-mono mt-1">#{selectedMember.memberId}</p>
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">{selectedMember.fullName}</h2>
+              <p className="text-[10px] text-zinc-500 font-mono mt-1 font-semibold">MEMBER ID: #{selectedMember.memberId}</p>
 
               {selectedMember.checkedInToday && (
-                <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#22C55E] bg-[#14532D] px-3 py-1 rounded-full">
+                <span className="mt-3.5 inline-flex items-center gap-1.5 text-[9px] font-black text-[#00FF88] bg-[#00FF88]/10 px-3 py-1 rounded-full uppercase tracking-wider">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  {t("alreadyCheckedIn")} — {selectedMember.todayCheckInTime && format(new Date(selectedMember.todayCheckInTime), "HH:mm")}
+                  {t("alreadyCheckedIn")} · {selectedMember.todayCheckInTime && format(new Date(selectedMember.todayCheckInTime), "HH:mm")}
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <InfoItem icon={Hash} label={membersT("id")} value={`#${selectedMember.memberId}`} />
               <InfoItem icon={Phone} label={membersT("phoneNumber")} value={selectedMember.phoneNumber ?? "—"} />
               <InfoItem icon={User} label={membersT("age")} value={selectedMember.age?.toString() ?? "—"} />
@@ -288,9 +290,9 @@ export default function CheckInPage() {
             </div>
 
             {selectedMember.currentPlan && (
-              <div className="text-xs text-[#94A3B8] p-3 rounded-lg bg-[#161B27] border border-[#2A3347]">
-                {selectedMember.currentPlan.name} — {selectedMember.currentPlan.duration} days —{" "}
-                {selectedMember.currentPlan.price.toLocaleString()} ETB
+              <div className="text-[10px] font-bold text-zinc-400 p-3.5 rounded-xl bg-white/[0.01] border border-white/5 uppercase tracking-wider">
+                Plan Details: {selectedMember.currentPlan.name} · {selectedMember.currentPlan.duration} days ·{" "}
+                <span className="text-[#FF6B00]">{selectedMember.currentPlan.price.toLocaleString()} ETB</span>
               </div>
             )}
 
@@ -301,25 +303,25 @@ export default function CheckInPage() {
                   setSelectedMember(null);
                   setQuery("");
                 }}
-                className="flex-1 h-11 rounded-lg border-[#2A3347] bg-transparent text-[#CBD5E1] hover:bg-[#2A3347] font-semibold text-sm"
+                className="flex-1 h-11 rounded-xl border-white/10 bg-transparent text-zinc-300 hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer"
               >
                 {common("cancel")}
               </Button>
               <Button
                 disabled={loading || !canCheckIn}
                 onClick={handleCheckIn}
-                className={`flex-[2] h-11 rounded-lg font-bold text-sm border-none ${
+                className={`flex-[2] h-11 rounded-xl font-black text-xs uppercase tracking-widest border-none cursor-pointer transition-all ${
                   canCheckIn
-                    ? "bg-[#22C55E] hover:bg-[#1ea850] text-[#0F1117]"
-                    : "bg-[#2A3347] text-[#64748B] cursor-not-allowed"
+                    ? "bg-[#FF6B00] hover:bg-[#E05E00] text-white shadow-lg shadow-[#FF6B00]/15"
+                    : "bg-white/5 text-zinc-500 cursor-not-allowed"
                 }`}
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("checkIn")}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin text-zinc-400" /> : t("checkIn")}
               </Button>
             </div>
 
             {isExpired && (
-              <p className="text-[#EF4444] text-xs font-semibold text-center">{t("subscriptionExpired")}</p>
+              <p className="text-red-500 text-[10px] font-black uppercase tracking-wider text-center animate-pulse">{t("subscriptionExpired")}</p>
             )}
           </div>
         </Card>
@@ -341,20 +343,20 @@ function InfoItem({
 }) {
   const valueColor =
     highlight === "danger"
-      ? "text-[#EF4444]"
+      ? "text-red-500"
       : highlight === "warning"
-        ? "text-[#F97316]"
+        ? "text-[#FF6B00]"
         : highlight === "success"
-          ? "text-[#22C55E]"
-          : "text-[#F1F5F9]";
+          ? "text-[#00FF88]"
+          : "text-white";
 
   return (
-    <div className="bg-[#161B27] p-3 rounded-lg border border-[#2A3347]">
-      <div className="flex items-center gap-1.5 mb-1">
-        <Icon className="w-3 h-3 text-[#64748B]" />
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">{label}</p>
+    <div className="bg-white/[0.01] p-3.5 rounded-xl border border-white/5">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Icon className="w-3.5 h-3.5 text-zinc-500" />
+        <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{label}</p>
       </div>
-      <p className={`text-sm font-semibold truncate ${valueColor}`}>{value}</p>
+      <p className={`text-xs font-bold truncate ${valueColor}`}>{value}</p>
     </div>
   );
 }

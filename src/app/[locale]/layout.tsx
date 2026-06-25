@@ -47,14 +47,14 @@ export default async function RootLayout({
 
   return (
     <html lang={validatedLocale} className={`h-full antialiased ${inter.variable} ${notoSansEthiopic.variable}`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col font-sans bg-[#0F1117] text-[#F1F5F9]">
+      <body className="min-h-full flex flex-col font-sans bg-[#0B0B0B] text-white">
         <Providers messages={messages} locale={validatedLocale}>
           <MobileMenuProvider>
             <div className="flex flex-col min-h-screen">
               {session && <TopBar />}
               <div className="flex flex-1">
                 {session && <Sidebar />}
-                <main className={`flex-1 transition-all duration-300 min-h-screen bg-[#0F1117] ${session ? 'pt-[56px] p-6' : ''}`}>
+                <main className={`flex-1 transition-all duration-300 min-h-screen bg-[#0B0B0B] ${session ? 'pt-[56px] p-6 md:pl-[260px]' : ''}`}>
                   {children}
                 </main>
               </div>

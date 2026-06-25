@@ -4,18 +4,9 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, UserPlus, Eye, Loader2, User, Filter } from "lucide-react";
+import { Search, UserPlus, Eye, Loader2, Filter } from "lucide-react";
 import { format } from "date-fns";
 
 interface MemberListItem {
@@ -61,19 +52,16 @@ export default function MembersDirectoryPage() {
 
   // Filtering Logic
   const filteredMembers = members.filter((m) => {
-    // 1. Search Query (Name or ID)
     const matchesSearch = 
       m.fullName.toLowerCase().includes(search.toLowerCase()) ||
       m.memberId.toString().includes(search);
 
-    // 2. Status check
     const isExpired = m.expiryDate ? new Date(m.expiryDate) < new Date() : true;
     const matchesStatus = 
       statusFilter === "all" ||
       (statusFilter === "active" && !isExpired) ||
       (statusFilter === "expired" && isExpired);
 
-    // 3. Plan check
     const planName = m.currentPlan?.name?.toLowerCase() || "";
     const matchesPlan = 
       planFilter === "all" ||
@@ -85,19 +73,18 @@ export default function MembersDirectoryPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       {/* Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-xl font-bold text-[#F1F5F9] tracking-tight">Members Directory</h1>
-          <p className="text-xs text-[#94A3B8] mt-0.5">
-            View, search, filter, and manage all registered gym members.
-          </p>
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FF6B00]/10 px-2.5 py-1 rounded">Directory</span>
+          <h1 className="text-3xl font-black text-white mt-3 uppercase tracking-tight leading-none">Members Registry</h1>
+          <p className="text-zinc-400 text-xs mt-2 max-w-xl font-medium">Search, filter, and audit all gym member profiles, billing statuses, and entry plans.</p>
         </div>
 
         <Button 
           onClick={() => router.push("/members/register")}
-          className="bg-[#22C55E] hover:bg-[#1ea850] text-[#0F1117] font-semibold text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 shadow-lg active:scale-97 border-none cursor-pointer"
+          className="bg-[#FF6B00] hover:bg-[#E05E00] text-white font-bold text-xs uppercase tracking-widest py-3 px-5 rounded-xl flex items-center gap-2 shadow-lg shadow-[#FF6B00]/15 active:scale-97 border-none cursor-pointer transition-all shrink-0"
         >
           <UserPlus className="w-4 h-4" />
           Add Member
@@ -105,30 +92,30 @@ export default function MembersDirectoryPage() {
       </div>
 
       {/* Filter and Search Panel */}
-      <div className="flex flex-col md:flex-row items-center gap-4 bg-[#1E2535] p-4 rounded-xl border border-[#2A3347]">
+      <div className="flex flex-col lg:flex-row items-center gap-4 bg-[#151515] p-5 rounded-2xl border border-white/5 shadow-xl">
         {/* Search */}
-        <div className="relative group w-full md:flex-1">
-          <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#94A3B8]">
+        <div className="relative group w-full lg:flex-1">
+          <span className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-[#FF6B00] transition-colors">
             <Search className="w-4 h-4" />
           </span>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or Member ID..."
-            className="w-full h-9 pl-9 pr-3 text-xs bg-[#1E2535] border border-[#2A3347] rounded-lg text-[#F1F5F9] placeholder-[#64748B] focus:border-[#22C55E] focus:outline-none"
+            placeholder="Search by member name or ID number..."
+            className="w-full h-11 pl-11 pr-4 text-xs bg-white/[0.02] border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
           />
         </div>
 
         {/* Status Filter */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#64748B] flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> Status
+        <div className="flex items-center gap-2.5 w-full lg:w-auto shrink-0">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 pl-1.5">
+            <Filter className="w-3.5 h-3.5 text-zinc-500" /> Status
           </span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 px-3 text-xs bg-[#1E2535] border border-[#2A3347] rounded-lg text-[#F1F5F9] focus:border-[#22C55E] outline-none cursor-pointer"
+            className="h-11 px-4 text-xs bg-[#151515] border border-white/10 rounded-xl text-white focus:border-[#FF6B00] outline-none cursor-pointer w-full lg:w-44 transition-all"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active Only</option>
@@ -137,12 +124,12 @@ export default function MembersDirectoryPage() {
         </div>
 
         {/* Plan Filter */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Plan</span>
+        <div className="flex items-center gap-2.5 w-full lg:w-auto shrink-0">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 pl-1.5">Plan</span>
           <select
             value={planFilter}
             onChange={(e) => setPlanFilter(e.target.value)}
-            className="h-9 px-3 text-xs bg-[#1E2535] border border-[#2A3347] rounded-lg text-[#F1F5F9] focus:border-[#22C55E] outline-none cursor-pointer"
+            className="h-11 px-4 text-xs bg-[#151515] border border-white/10 rounded-xl text-white focus:border-[#FF6B00] outline-none cursor-pointer w-full lg:w-44 transition-all"
           >
             <option value="all">All Plans</option>
             <option value="monthly">Monthly</option>
@@ -152,32 +139,32 @@ export default function MembersDirectoryPage() {
         </div>
       </div>
 
-      {/* Members Table */}
-      <Card className="bg-[#1E2535] border border-[#2A3347] rounded-xl overflow-hidden shadow-lg">
+      {/* Members Grid/Table Container */}
+      <Card className="bg-[#151515] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-20 flex flex-col items-center justify-center text-[#94A3B8]">
-              <Loader2 className="w-10 h-10 animate-spin text-[#22C55E] mb-3" />
-              <p className="text-xs font-semibold uppercase tracking-wider">Loading directory...</p>
+            <div className="p-24 flex flex-col items-center justify-center text-zinc-500">
+              <Loader2 className="w-10 h-10 animate-spin text-[#FF6B00] mb-4" />
+              <p className="text-[10px] font-bold uppercase tracking-widest">Loading Member Registry...</p>
             </div>
           ) : (
             <div className="overflow-x-auto w-full">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[#2A3347]">
-                    <th className="py-3 px-6 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Member</th>
-                    <th className="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Membership Plan</th>
-                    <th className="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Join Date</th>
-                    <th className="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Expiry Date</th>
-                    <th className="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Status</th>
-                    <th className="py-3 px-6 text-[11px] font-semibold uppercase tracking-wider text-[#64748B] text-right">Actions</th>
+                  <tr className="border-b border-white/5 bg-white/[0.01]">
+                    <th className="py-4.5 px-6 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Member</th>
+                    <th className="py-4.5 px-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Subscription Plan</th>
+                    <th className="py-4.5 px-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Join Date</th>
+                    <th className="py-4.5 px-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Expiry Date</th>
+                    <th className="py-4.5 px-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</th>
+                    <th className="py-4.5 px-6 text-[10px] font-bold uppercase tracking-wider text-zinc-500 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-white/5">
                   {filteredMembers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-[#94A3B8] italic text-xs">
-                        No members match the current search filters.
+                      <td colSpan={6} className="py-16 text-center text-zinc-500 italic text-xs bg-transparent">
+                        No members found matching the search query or filters.
                       </td>
                     </tr>
                   ) : (
@@ -192,62 +179,61 @@ export default function MembersDirectoryPage() {
                       );
 
                       return (
-                        <tr key={member.id} className="border-b border-[#2A3347] hover:bg-[#2A3347] transition-colors group">
+                        <tr key={member.id} className="border-b border-white/5 hover:bg-white/[0.01] transition-all group">
                           {/* Avatar + Name */}
-                          <td className="py-3.5 px-6">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="w-9 h-9">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3.5">
+                              <Avatar className="w-10 h-10 ring-1 ring-white/10 transition-transform group-hover:scale-105 duration-200">
                                 <AvatarImage src={member.photoUrl ?? undefined} />
-                                <AvatarFallback className="bg-[#161B27] text-[#22C55E] text-xs font-bold">
+                                <AvatarFallback className="bg-gradient-to-br from-[#FF6B00] to-[#FF8C39] text-black text-xs font-black">
                                   {member.fullName.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <span className="text-sm font-semibold text-[#F1F5F9] block leading-none">{member.fullName}</span>
-                                <span className="text-[10px] font-mono text-[#64748B] mt-1 block">#{member.memberId}</span>
+                                <span className="text-sm font-bold text-white block leading-none group-hover:text-[#FF6B00] transition-colors">{member.fullName}</span>
+                                <span className="text-[10px] font-mono text-zinc-500 mt-1.5 block">ID: #{member.memberId}</span>
                               </div>
                             </div>
                           </td>
 
                           {/* Membership Plan */}
-                          <td className="py-3.5 px-4 text-sm text-[#CBD5E1]">
+                          <td className="py-4 px-4 text-xs font-bold text-zinc-300">
                             {member.currentPlan?.name ?? "Daily Pass"}
                           </td>
 
                           {/* Join Date */}
-                          <td className="py-3.5 px-4 text-xs font-medium text-[#94A3B8]">
+                          <td className="py-4 px-4 text-xs font-medium text-zinc-400 font-mono">
                             {member.registrationDate ? format(new Date(member.registrationDate), 'MMM dd, yyyy') : 'N/A'}
                           </td>
 
                           {/* Expiry Date */}
-                          <td className="py-3.5 px-4 text-xs font-medium text-[#94A3B8]">
+                          <td className="py-4 px-4 text-xs font-medium text-zinc-400 font-mono">
                             {member.expiryDate ? format(new Date(member.expiryDate), 'MMM dd, yyyy') : 'N/A'}
                           </td>
 
                           {/* Status Badge */}
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          <td className="py-4 px-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
                               isExpired 
-                                ? 'bg-[#7F1D1D] text-[#EF4444]' 
+                                ? 'bg-red-500/10 text-red-500 border border-red-500/10' 
                                 : isExpiringSoon 
-                                  ? 'bg-[#7C2D12] text-[#F97316]'
-                                  : 'bg-[#14532D] text-[#22C55E]'
+                                  ? 'bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/10'
+                                  : 'bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/10'
                             }`}>
                               {isExpired ? "Expired" : isExpiringSoon ? "Expiring Soon" : "Active"}
                             </span>
                           </td>
 
                           {/* Actions */}
-                          <td className="py-3.5 px-6 text-right">
+                          <td className="py-4 px-6 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <Button
                                 variant="outline"
-                                size="xs"
                                 onClick={() => router.push(`/members/${member.id}`)}
-                                className="bg-transparent border border-[#2A3347] text-[#CBD5E1] hover:bg-[#2A3347] hover:text-[#F1F5F9] text-xs font-semibold px-3 py-1 rounded-md"
+                                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer"
                               >
-                                <Eye className="w-3.5 h-3.5 mr-1" />
-                                View Profile
+                                <Eye className="w-3.5 h-3.5 mr-1 text-zinc-400 group-hover:text-white" />
+                                Profile
                               </Button>
                             </div>
                           </td>

@@ -47,29 +47,40 @@ export default function Sidebar() {
 
   const visibleMenuItems = menuItems.filter((item) => !item.managerOnly || canManage);
 
-  if (!isOpen) return null;
-
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110]"
-        onClick={() => setIsOpen(false)}
-      />
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] md:hidden transition-opacity duration-300"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
 
-      <aside className="fixed top-0 left-0 bottom-0 z-[120] w-[260px] bg-[#161B27] border-r border-[#2A3347] flex flex-col justify-between shadow-2xl">
+      <aside className={`
+        fixed top-0 left-0 bottom-0 z-[120] w-[260px] bg-[#090909] border-r border-white/5 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
         <div>
-          <div className="h-[56px] flex items-center justify-between px-4 border-b border-[#2A3347]">
-            <span className="text-sm font-bold text-[#F1F5F9]">Menu</span>
+          {/* Logo / Header */}
+          <div className="h-[56px] flex items-center justify-between px-5 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B00] to-[#FF8C39] flex items-center justify-center font-black text-xs text-black shadow-lg shadow-[#FF6B00]/25">
+                G
+              </div>
+              <span className="text-sm font-black uppercase tracking-wider text-white bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">GymOS Pro</span>
+            </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1E2535] rounded-lg border-none cursor-pointer"
+              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg border-none cursor-pointer md:hidden transition-colors"
               aria-label="Close menu"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <nav className="py-3 px-3 space-y-1">
+          {/* Navigation Links */}
+          <nav className="py-4 px-3 space-y-1.5">
             {visibleMenuItems.map((item) => {
               const isActive = pathname.startsWith(item.path);
               return (
@@ -80,13 +91,16 @@ export default function Sidebar() {
                     setIsOpen(false);
                   }}
                   className={`
-                    w-full flex items-center gap-3 py-3 px-4 rounded-lg text-sm font-semibold tracking-tight transition-all border-none cursor-pointer
+                    w-full flex items-center gap-3 py-2.5 px-4 rounded-lg text-xs font-bold tracking-wider uppercase transition-all border-none cursor-pointer relative group
                     ${isActive 
-                      ? 'bg-[rgba(34,197,94,0.12)] text-[#22C55E]' 
-                      : 'text-[#94A3B8] hover:bg-[#1E2535] hover:text-[#F1F5F9]'}
+                      ? 'bg-gradient-to-r from-[#FF6B00]/10 to-[#FF6B00]/0 text-[#FF6B00]' 
+                      : 'text-zinc-400 hover:bg-white/5 hover:text-white'}
                   `}
                 >
-                  <item.icon className="w-4 h-4 shrink-0" />
+                  {isActive && (
+                    <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#FF6B00] rounded-r" />
+                  )}
+                  <item.icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-[#FF6B00]' : 'text-zinc-400'}`} />
                   <span>{item.name}</span>
                 </button>
               );
@@ -94,7 +108,8 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-[#2A3347] space-y-4 bg-[#161B27]">
+        {/* Footer Area */}
+        <div className="p-4 border-t border-white/5 space-y-4 bg-[#090909]">
           <div className="px-2">
             <LanguageSwitcher />
           </div>
@@ -102,42 +117,42 @@ export default function Sidebar() {
           <div className="relative">
             <button 
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#1E2535] transition-all text-left border-none cursor-pointer"
+              className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-all text-left border-none cursor-pointer"
             >
-              <div className="flex items-center gap-2">
-                <Avatar className="w-8 h-8 ring-1 ring-[#2A3347] bg-[#1E2535]">
+              <div className="flex items-center gap-2.5">
+                <Avatar className="w-8 h-8 ring-1 ring-white/10 bg-[#151515]">
                   <AvatarImage src={session?.user?.image ?? undefined} />
-                  <AvatarFallback className="bg-[#1E2535] text-[#22C55E] text-xs font-bold">
+                  <AvatarFallback className="bg-gradient-to-br from-[#FF6B00] to-[#FF8C39] text-black text-xs font-black">
                     {session?.user?.name ? session.user.name.substring(0, 2).toUpperCase() : "AD"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="truncate w-32">
-                  <p className="text-xs font-bold text-[#F1F5F9] truncate leading-none">
+                  <p className="text-xs font-bold text-white truncate leading-none">
                     {session?.user?.name ?? "John Admin"}
                   </p>
-                  <p className="text-[10px] text-[#94A3B8] leading-none mt-1">
+                  <p className="text-[10px] text-zinc-400 leading-none mt-1 font-semibold">
                     {session?.user?.role ?? "ADMIN"}
                   </p>
                 </div>
               </div>
-              <span className="text-[#94A3B8] text-xs">▾</span>
+              <span className="text-zinc-500 text-xs">▾</span>
             </button>
 
             {showProfileMenu && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#1E2535] border border-[#2A3347] rounded-xl shadow-xl z-50 py-2">
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#151515]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 py-2 divide-y divide-white/5 animate-in fade-in slide-in-from-bottom-2 duration-200">
                 <button
                   onClick={() => {
                     router.push("/settings/gym", { locale });
                     setShowProfileMenu(false);
                     setIsOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2 text-xs font-semibold text-[#CBD5E1] hover:bg-[#2A3347] hover:text-[#F1F5F9] transition-colors border-none cursor-pointer"
+                  className="w-full text-left px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-white/5 hover:text-white transition-colors border-none cursor-pointer"
                 >
                   Settings
                 </button>
                 <button 
                   onClick={() => signOut()}
-                  className="w-full text-left px-4 py-2 text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-colors flex items-center gap-2 border-none cursor-pointer"
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2 border-none cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Logout
