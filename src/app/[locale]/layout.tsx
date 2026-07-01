@@ -9,6 +9,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import BackgroundSlideshow from "@/components/BackgroundSlideshow";
 import { MobileMenuProvider } from "@/components/MobileMenuContext";
 import type { Locale, IntlProviderMessages } from "@/types/app";
 
@@ -47,10 +48,14 @@ export default async function RootLayout({
 
   return (
     <html lang={validatedLocale} className={`h-full antialiased ${inter.variable} ${notoSansEthiopic.variable}`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col font-sans text-white">
+      <body className="min-h-full flex flex-col font-sans text-white relative">
+        <div className="fixed inset-0 z-0 bg-[#0B0B0B]">
+          <BackgroundSlideshow />
+          <div className="absolute inset-0 bg-black/80" />
+        </div>
         <Providers messages={messages} locale={validatedLocale}>
           <MobileMenuProvider>
-            <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col min-h-screen relative z-10">
               {session && <TopBar />}
               <div className="flex flex-1">
                 {session && <Sidebar />}
