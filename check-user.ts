@@ -3,22 +3,34 @@ import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 
-const dbPath = path.join(process.cwd(), 'dev.db');
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
-const prisma = new PrismaClient({ adapter });
+async function check(label: string, dbPath: string) {
+  const adapter = new PrismaBetterSqlite3({ url: dbPath });
+  const prisma = new PrismaClient({ adapter });
 
-async function check() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'superadmin@gym.com' }
-  });
-  console.log('User found:', user ? 'Yes' : 'No');
-  if (user) {
-    console.log('Role:', user.role);
-    console.log('Password hash:', user.password.substring(0, 30) + '...');
-    const valid = await bcrypt.compare('superadmin123', user.password);
-    console.log('Password valid:', valid);
+  const manager = await prisma.user.findUnique({ where: { email: 'manager@gym.com' } });
+  const superAdmin = await prisma.user.findUnique({ where: { email: 'superadmin@gym.com' } });
+
+  console.log(`[${label}]`);
+  console.log('  manager@gym.com:', manager ? 'OK' : 'MISSING');
+  if (superAdmin) {
+    const valid = await bcrypt.compare('superadmin123', superAdmin.password);
+    console.log('  superadmin@gym.com: OK (password valid:', valid, ')');
+  } else {
+    console.log('  superadmin@gym.com: MISSING');
   }
+  console.log('  db:', dbPath);
+  console.log();
   await prisma.$disconnect();
 }
 
-check();
+async function main() {
+  await check('CURRENT', path.join(process.cwd(), 'dev.db'));
+
+  const { execSync } = require('child_process');
+  const tmpDir = require('os').tmpdir();
+  const tmpDb = path.join(tmpDir, 'dev-committed.db');
+  execSync(`git show HEAD:dev.db > "${tmpDb}"`);
+  await check('COMMITTED (HEAD)', tmpDb);
+}
+
+main();
