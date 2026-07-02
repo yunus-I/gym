@@ -112,5 +112,16 @@
     "logo": "የጂም አርማ",
     "save": "ለውጦችን አስቀምጥ",
     "success": "መገለጫው በተሳካ ሁኔታ ተዘምኗል"
+  },
+  "Admin": {
+    "title": "የአስተዳደር ፓነል",
+    "gyms": "የጂም ቤቶች",
+    "createGym": "አዲስ ጂም",
+    "deleteGym": "ጂም ሰርዝ",
+    "staff": "የሰራተኞች መለያዎች",
+    "addUser": "ተጠቃሚ ጨምር",
+    "totalMembers": "ጠቅላላ አባላት",
+    "totalPlans": "ጠቅላላ እቅዶች",
+    "totalStaff": "ጠቅላላ ሰራተኞች"
   }
 }

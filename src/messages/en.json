@@ -112,5 +112,16 @@
     "logo": "Gym Logo",
     "save": "Save Changes",
     "success": "Profile updated successfully"
+  },
+  "Admin": {
+    "title": "Admin Panel",
+    "gyms": "Gym Houses",
+    "createGym": "New Gym",
+    "deleteGym": "Delete Gym",
+    "staff": "Staff Accounts",
+    "addUser": "Add User",
+    "totalMembers": "Total Members",
+    "totalPlans": "Total Plans",
+    "totalStaff": "Total Staff"
   }
 }

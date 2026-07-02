@@ -9,14 +9,15 @@ import {
   Settings,
   LogOut,
   X,
-  ClipboardCheck
+  ClipboardCheck,
+  Shield
 } from "lucide-react";
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import type { Locale } from "@/types/app";
 import type { LucideIcon } from "lucide-react";
-import { hasManagerAccess } from "@/lib/access";
+import { hasManagerAccess, isSuperAdmin } from "@/lib/access";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMobileMenu } from "./MobileMenuContext";
 
@@ -25,6 +26,7 @@ interface MenuItem {
   path: string;
   icon: LucideIcon;
   managerOnly?: boolean;
+  superAdminOnly?: boolean;
 }
 
 export default function Sidebar() {
@@ -36,6 +38,7 @@ export default function Sidebar() {
   const { isOpen, setIsOpen } = useMobileMenu();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const canManage = hasManagerAccess(session?.user?.role);
+  const superAdmin = isSuperAdmin(session?.user?.role);
 
   const menuItems: MenuItem[] = [
     { name: t("dashboard"), path: "/dashboard", icon: LayoutDashboard, managerOnly: true },
@@ -43,9 +46,13 @@ export default function Sidebar() {
     { name: t("members"), path: "/members", icon: Users },
     { name: t("payments"), path: "/payments", icon: CreditCard, managerOnly: true },
     { name: "Settings", path: "/settings/gym", icon: Settings, managerOnly: true },
+    { name: "Admin", path: "/admin", icon: Shield, superAdminOnly: true },
   ];
 
-  const visibleMenuItems = menuItems.filter((item) => !item.managerOnly || canManage);
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.superAdminOnly) return superAdmin;
+    return !item.managerOnly || canManage;
+  });
 
   return (
     <>
@@ -128,7 +135,7 @@ export default function Sidebar() {
                   <p className="text-xs font-bold text-white truncate leading-none">
                     {session?.user?.name ?? "John Admin"}
                   </p>
-                  <p className="text-[10px] text-zinc-400 leading-none mt-1 font-semibold">
+                  <p className={`text-[10px] leading-none mt-1 font-semibold ${superAdmin ? 'text-[#FF6B00]' : 'text-zinc-400'}`}>
                     {session?.user?.role ?? "ADMIN"}
                   </p>
                 </div>

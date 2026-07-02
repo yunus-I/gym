@@ -5,6 +5,7 @@ import { Bell, Search, Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMobileMenu } from "./MobileMenuContext";
+import { isSuperAdmin } from "@/lib/access";
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: "Dashboard",
@@ -14,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   "check-in": "Check-In",
   plans: "Plans",
   login: "Login",
+  admin: "Admin Panel",
 };
 
 export default function TopBar() {
@@ -23,6 +25,7 @@ export default function TopBar() {
 
   const pageKey = pathname.split("/").filter(Boolean)[0] ?? "dashboard";
   const pageTitle = PAGE_TITLES[pageKey] ?? pageKey.charAt(0).toUpperCase() + pageKey.slice(1);
+  const superAdmin = isSuperAdmin(session?.user?.role);
 
   return (
     <header className="fixed top-0 left-0 md:left-[260px] right-0 h-[56px] bg-[#0B0B0B]/80 backdrop-blur-md border-b border-white/5 z-[100] flex items-center justify-between px-6">
@@ -69,7 +72,7 @@ export default function TopBar() {
             <p className="text-xs font-bold text-white leading-none max-w-[100px] truncate">
               {session?.user?.name ?? "Admin User"}
             </p>
-            <p className="text-[10px] text-zinc-400 font-semibold leading-none mt-1 uppercase tracking-wider">
+            <p className={`text-[10px] font-semibold leading-none mt-1 uppercase tracking-wider ${superAdmin ? 'text-[#FF6B00]' : 'text-zinc-400'}`}>
               {session?.user?.role ?? "MANAGER"}
             </p>
           </div>

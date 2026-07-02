@@ -2,9 +2,14 @@ import type { Role } from "@prisma/client";
 import { routing } from "@/i18n/routing";
 
 const MANAGER_ROLES: Role[] = ["MANAGER", "ADMIN"];
+const SUPER_ADMIN_ROLES: Role[] = ["SUPER_ADMIN"];
 
 export function hasManagerAccess(role?: Role | null): boolean {
-  return Boolean(role && MANAGER_ROLES.includes(role));
+  return Boolean(role && (MANAGER_ROLES.includes(role) || SUPER_ADMIN_ROLES.includes(role)));
+}
+
+export function isSuperAdmin(role?: Role | null): boolean {
+  return Boolean(role && SUPER_ADMIN_ROLES.includes(role));
 }
 
 export function stripLocalePrefix(pathname: string): string {
@@ -40,5 +45,6 @@ export function isManagerOnlyPath(pathname: string): boolean {
     "/members/register",
     "/plans",
     "/settings/gym",
+    "/admin",
   ].some((path) => normalizedPath === path || normalizedPath.startsWith(`${path}/`));
 }
