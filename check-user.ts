@@ -1,15 +1,24 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import path from 'path';
+import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+const dbPath = path.join(process.cwd(), 'dev.db');
+const adapter = new PrismaBetterSqlite3({ url: dbPath });
+const prisma = new PrismaClient({ adapter });
 
 async function check() {
   const user = await prisma.user.findUnique({
-    where: { email: 'manager@gym.com' }
+    where: { email: 'superadmin@gym.com' }
   });
   console.log('User found:', user ? 'Yes' : 'No');
   if (user) {
-    console.log('Has password:', !!user.password);
+    console.log('Role:', user.role);
+    console.log('Password hash:', user.password.substring(0, 30) + '...');
+    const valid = await bcrypt.compare('superadmin123', user.password);
+    console.log('Password valid:', valid);
   }
+  await prisma.$disconnect();
 }
 
-check().catch(console.error).finally(() => prisma.$disconnect());
+check();
