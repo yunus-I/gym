@@ -17,14 +17,14 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl border border-slate-200 dark:border-zinc-700">
+    <div className="flex items-center justify-center gap-0.5 bg-zinc-800/50 mx-4 rounded-lg border border-white/5">
       <button
         onClick={() => onLocaleChange('en')}
         disabled={isPending}
-        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
+        className={`flex-1 px-2 py-1.5 rounded-md text-xs font-bold transition-all ${
           locale === 'en'
-            ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-            : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
+            ? 'bg-[#FF6B00] text-black shadow-sm'
+            : 'text-zinc-400 hover:text-white'
         }`}
       >
         EN
@@ -32,10 +32,10 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => onLocaleChange('am')}
         disabled={isPending}
-        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
+        className={`flex-1 px-2 py-1.5 rounded-md text-xs font-bold transition-all ${
           locale === 'am'
-            ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-            : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
+            ? 'bg-[#FF6B00] text-black shadow-sm'
+            : 'text-zinc-400 hover:text-white'
         }`}
       >
         አማርኛ

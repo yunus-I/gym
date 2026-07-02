@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Download, CreditCard, Loader2, Filter, Search, DollarSign, Wallet, CheckCircle } from "lucide-react";
+import { Download, CreditCard, Loader2, Filter, Search, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 
 interface PaymentRecord {
@@ -82,11 +82,6 @@ export default function PaymentsPage() {
   });
 
   const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
-  const cashTotal = payments.filter(p => p.paymentMethod === "Cash").reduce((sum, p) => sum + p.amount, 0);
-  const bankTotal = payments.filter(p => p.paymentMethod === "Bank Transfer").reduce((sum, p) => sum + p.amount, 0);
-
-  const cashPercent = totalRevenue > 0 ? Math.round((cashTotal / totalRevenue) * 100) : 0;
-  const bankPercent = totalRevenue > 0 ? Math.round((bankTotal / totalRevenue) * 100) : 0;
 
   return (
     <div className="space-y-8 pb-12">
@@ -137,71 +132,7 @@ export default function PaymentsPage() {
           </div>
         </Card>
 
-        {/* Payment Methods Breakdown Card */}
-        <Card className="bg-[#151515] border border-white/5 rounded-2xl p-6 flex flex-col justify-between hover:border-white/10 transition-colors relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Methods Breakdown</span>
-            <div className="p-2 rounded-lg bg-white/5 text-[#3B82F6]">
-              <Wallet className="w-4 h-4" />
-            </div>
-          </div>
 
-          <div className="my-5 space-y-3.5">
-            {/* Bank Transfer Bar */}
-            <div>
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">
-                <span>Bank Transfer</span>
-                <span className="text-[#3B82F6]">{bankPercent}%</span>
-              </div>
-              <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-[#3B82F6] h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${bankPercent}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Cash Bar */}
-            <div>
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">
-                <span>Cash Receipts</span>
-                <span className="text-[#00FF88]">{cashPercent}%</span>
-              </div>
-              <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-[#00FF88] h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${cashPercent}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-white/[0.01] p-3 rounded-xl border border-white/5">
-            Split analysis of gym cashflow logs.
-          </div>
-        </Card>
-
-        {/* Integration Status Card */}
-        <Card className="bg-[#151515] border border-white/5 rounded-2xl p-6 flex flex-col justify-between hover:border-white/10 transition-colors relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">System Gateway</span>
-            <div className="p-2 rounded-lg bg-white/5 text-[#00FF88]">
-              <CheckCircle className="w-4 h-4" />
-            </div>
-          </div>
-
-          <div className="my-6">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] animate-pulse" />
-              <h3 className="text-md font-black text-white uppercase tracking-wider leading-none">Operational</h3>
-            </div>
-            <p className="text-[10px] text-zinc-500 font-semibold mt-2.5 leading-relaxed">All transaction gateways, checkouts, and local database seeds are online and operating normally.</p>
-          </div>
-
-          <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-white/[0.01] p-3 rounded-xl border border-white/5">
-            Gateway latency: ~45ms · secure logs
-          </div>
-        </Card>
       </div>
 
       {/* Filter and Search Panel */}

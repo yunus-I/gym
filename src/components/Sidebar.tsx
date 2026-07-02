@@ -110,9 +110,7 @@ export default function Sidebar() {
 
         {/* Footer Area */}
         <div className="p-4 border-t border-white/5 space-y-4 bg-[#090909]">
-          <div className="px-2">
-            <LanguageSwitcher />
-          </div>
+          <LanguageSwitcher />
 
           <div className="relative">
             <button 
