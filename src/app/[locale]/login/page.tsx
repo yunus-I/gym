@@ -42,42 +42,42 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950 p-6">
+    <div className="min-h-screen flex items-center justify-center p-6">
       <div className="absolute top-8 right-8">
         <LanguageSwitcher />
       </div>
 
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-2xl shadow-indigo-500/10 border border-slate-200 dark:border-zinc-800 overflow-hidden">
+        <div className="bg-[#151515] rounded-2xl shadow-2xl border border-white/5 overflow-hidden">
           <div className="p-10">
             <div className="flex flex-col items-center mb-10">
-              <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-6 rotate-3">
-                <span className="text-white font-bold text-3xl">G</span>
+              <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B00] to-[#FF8C39] rounded-2xl flex items-center justify-center shadow-lg shadow-[#FF6B00]/30 mb-6 rotate-3">
+                <span className="text-black font-bold text-3xl">G</span>
               </div>
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2">
+              <h1 className="text-3xl font-black text-white mb-2">
                 {t('signIn')}
               </h1>
-              <p className="text-slate-500 dark:text-zinc-400 text-sm">
+              <p className="text-zinc-400 text-sm">
                 Enter your credentials to access your dashboard
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-900/30 rounded-2xl text-rose-600 dark:text-rose-400 text-sm font-medium animate-shake">
+                <div className="p-4 bg-rose-900/20 border border-rose-900/30 rounded-2xl text-rose-400 text-sm font-medium">
                   {error}
                 </div>
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-zinc-300 ml-1">
+                <label className="text-sm font-bold text-zinc-300 ml-1">
                   {t('email')}
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-zinc-800 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-900 dark:text-white"
+                  className="w-full px-6 py-4 bg-zinc-800/50 border border-white/10 rounded-xl focus:border-[#FF6B00] transition-all outline-none text-white placeholder-zinc-500"
                   placeholder="manager@gym.com"
                   required
                 />
@@ -85,10 +85,10 @@ export default function LoginPage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
-                  <label className="text-sm font-bold text-slate-700 dark:text-zinc-300">
+                  <label className="text-sm font-bold text-zinc-300">
                     {t('password')}
                   </label>
-                  <a href="#" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                  <a href="#" className="text-xs font-semibold text-[#FF6B00] hover:underline">
                     {t('forgotPassword')}
                   </a>
                 </div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-zinc-800 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-900 dark:text-white"
+                  className="w-full px-6 py-4 bg-zinc-800/50 border border-white/10 rounded-xl focus:border-[#FF6B00] transition-all outline-none text-white placeholder-zinc-500"
                   placeholder="••••••••"
                   required
                 />
@@ -105,11 +105,11 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-indigo-500/30 transform active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-3"
+                className="w-full py-4 bg-[#FF6B00] hover:bg-[#FF8C39] text-black rounded-xl font-bold text-lg transition-all shadow-lg shadow-[#FF6B00]/25 transform active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-3 border-none cursor-pointer"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                     {common('loading')}
                   </>
                 ) : (
@@ -119,9 +119,9 @@ export default function LoginPage() {
             </form>
           </div>
           
-          <div className="bg-slate-50 dark:bg-zinc-800/50 p-6 text-center border-t border-slate-100 dark:border-zinc-800">
-            <p className="text-sm text-slate-500 dark:text-zinc-400">
-              Need assistance? <a href="#" className="text-indigo-600 dark:text-indigo-400 font-bold">Contact Support</a>
+          <div className="bg-zinc-800/30 p-6 text-center border-t border-white/5">
+            <p className="text-sm text-zinc-400">
+              Need assistance? <a href="#" className="text-[#FF6B00] font-bold">Contact Support</a>
             </p>
           </div>
         </div>
