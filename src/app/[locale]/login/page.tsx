@@ -15,6 +15,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('FORM SUBMITTED', email);
     setLoading(true);
     setError('');
 
@@ -25,13 +26,16 @@ export default function LoginPage() {
         redirect: false,
       });
 
+      console.log('SIGNIN RESULT', result);
+
       if (result?.error) {
         setError('Invalid credentials');
       } else {
         const locale = window.location.pathname.split('/')[1] || 'en';
         window.location.href = `/${locale}`;
       }
-    } catch {
+    } catch (err) {
+      console.error('LOGIN ERROR', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -102,6 +106,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
+                onClick={() => console.log('BUTTON CLICKED', loading)}
                 className="w-full py-4 bg-[#FF6B00] hover:bg-[#FF8C39] text-black rounded-xl font-bold text-lg transition-all shadow-lg shadow-[#FF6B00]/25 transform active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-3 border-none cursor-pointer"
               >
                 {loading ? (
