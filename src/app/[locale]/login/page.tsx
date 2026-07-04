@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function LoginPage() {
   const t = useTranslations('Auth');
   const common = useTranslations('Common');
-  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -29,7 +28,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid credentials');
       } else {
-        // Navigate to root - server-side page.tsx will redirect based on role
+        const locale = window.location.pathname.split('/')[1] || 'en';
         window.location.href = `/${locale}`;
       }
     } catch {
