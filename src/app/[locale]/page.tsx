@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { hasManagerAccess } from "@/lib/access";
 import HomeLanding from "@/components/HomeLanding";
 
 export default async function Home({
@@ -12,7 +13,10 @@ export default async function Home({
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect(`/${locale}/dashboard`);
+    if (hasManagerAccess(session.user?.role)) {
+      redirect(`/${locale}/dashboard`);
+    }
+    redirect(`/${locale}/check-in`);
   }
 
   return <HomeLanding />;

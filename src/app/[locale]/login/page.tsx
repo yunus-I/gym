@@ -1,16 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { getSession, signIn } from 'next-auth/react';
-import { useRouter } from '@/i18n/routing';
-import { useTranslations } from 'next-intl';
+import { signIn } from 'next-auth/react';
+import { useLocale, useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { hasManagerAccess } from '@/lib/access';
 
 export default function LoginPage() {
   const t = useTranslations('Auth');
   const common = useTranslations('Common');
-  const router = useRouter();
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,8 +29,8 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid credentials');
       } else {
-        const session = await getSession();
-        router.push(hasManagerAccess(session?.user?.role) ? '/dashboard' : '/check-in');
+        // Navigate to root - server-side page.tsx will redirect based on role
+        window.location.href = `/${locale}`;
       }
     } catch {
       setError('An unexpected error occurred');
