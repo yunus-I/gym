@@ -1,21 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function LoginPage() {
-  const t = useTranslations('Auth');
-  const common = useTranslations('Common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    console.log('LOGIN PAGE MOUNTED');
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('FORM SUBMITTED', email);
+    console.log('FORM SUBMITTED');
     setLoading(true);
     setError('');
 
@@ -23,17 +23,11 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: '/en',
       });
 
       console.log('SIGNIN RESULT', result);
-
-      if (result?.error) {
-        setError('Invalid credentials');
-      } else {
-        const locale = window.location.pathname.split('/')[1] || 'en';
-        window.location.href = `/${locale}`;
-      }
     } catch (err) {
       console.error('LOGIN ERROR', err);
       setError('An unexpected error occurred');
@@ -44,10 +38,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="absolute top-8 right-8">
-        <LanguageSwitcher />
-      </div>
-
       <div className="w-full max-w-md">
         <div className="bg-[#151515] rounded-2xl shadow-2xl border border-white/5 overflow-hidden">
           <div className="p-10">
@@ -56,7 +46,7 @@ export default function LoginPage() {
                 <span className="text-black font-bold text-3xl">G</span>
               </div>
               <h1 className="text-3xl font-black text-white mb-2">
-                {t('signIn')}
+                Sign In
               </h1>
               <p className="text-zinc-400 text-sm">
                 Enter your credentials to access your dashboard
@@ -72,7 +62,7 @@ export default function LoginPage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-bold text-zinc-300 ml-1">
-                  {t('email')}
+                  Email
                 </label>
                 <input
                   type="email"
@@ -87,10 +77,10 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-sm font-bold text-zinc-300">
-                    {t('password')}
+                    Password
                   </label>
                   <a href="#" className="text-xs font-semibold text-[#FF6B00] hover:underline">
-                    {t('forgotPassword')}
+                    Forgot Password?
                   </a>
                 </div>
                 <input
@@ -106,21 +96,13 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                onClick={() => console.log('BUTTON CLICKED', loading)}
                 className="w-full py-4 bg-[#FF6B00] hover:bg-[#FF8C39] text-black rounded-xl font-bold text-lg transition-all shadow-lg shadow-[#FF6B00]/25 transform active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-3 border-none cursor-pointer"
               >
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                    {common('loading')}
-                  </>
-                ) : (
-                  t('signIn')
-                )}
+                {loading ? 'Loading...' : 'Sign In'}
               </button>
             </form>
           </div>
-          
+
           <div className="bg-zinc-800/30 p-6 text-center border-t border-white/5">
             <p className="text-sm text-zinc-400">
               Need assistance? <a href="#" className="text-[#FF6B00] font-bold">Contact Support</a>
