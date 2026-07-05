@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
+import { useRouter } from '@/i18n/routing';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,21 +16,25 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('FORM SUBMITTED');
     setLoading(true);
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: true,
-        callbackUrl: '/en',
+      const locale = window.location.pathname.split('/')[1] || 'en';
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, password }),
       });
 
-      console.log('SIGNIN RESULT', result);
-    } catch (err) {
-      console.error('LOGIN ERROR', err);
+      if (res.redirected) {
+        window.location.href = res.url;
+        return;
+      }
+
+      const data = await res.json();
+      setError(data.error || 'Login failed');
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -53,7 +58,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form action="/api/login" method="POST" onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="p-4 bg-rose-900/20 border border-rose-900/30 rounded-2xl text-rose-400 text-sm font-medium">
                   {error}
@@ -66,6 +71,7 @@ export default function LoginPage() {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-6 py-4 bg-zinc-800/50 border border-white/10 rounded-xl focus:border-[#FF6B00] transition-all outline-none text-white placeholder-zinc-500"
@@ -85,6 +91,7 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="password"
+                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-6 py-4 bg-zinc-800/50 border border-white/10 rounded-xl focus:border-[#FF6B00] transition-all outline-none text-white placeholder-zinc-500"
