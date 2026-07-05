@@ -18,11 +18,12 @@ export default async function proxy(req: NextRequest): Promise<NextResponse | Re
     return intlMiddleware(req);
   }
 
-  const cookieName = process.env.NODE_ENV === "production"
-    ? "__Secure-next-auth.session-token"
-    : "next-auth.session-token";
+  const secureCookie = "__Secure-next-auth.session-token";
+  const insecureCookie = "next-auth.session-token";
 
-  const hasSessionCookie = !!req.cookies.get(cookieName)?.value;
+  const hasSessionCookie = !!(
+    req.cookies.get(secureCookie)?.value || req.cookies.get(insecureCookie)?.value
+  );
   const locale = getLocaleFromPath(req.nextUrl.pathname);
 
   if (!hasSessionCookie) {
