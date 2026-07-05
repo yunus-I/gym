@@ -11,28 +11,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filename = `${Date.now()}-${sanitizedName}`;
+    const ext = file.name?.split(".").pop()?.toLowerCase() || "jpg";
+    const filename = `${Date.now()}.${ext}`;
 
     const supabase = getSupabaseAdmin();
 
-    let { error } = await supabase.storage.from(BUCKET).upload(filename, file, {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some((b) => b.name === BUCKET);
+    if (!bucketExists) {
+      const { error: be } = await supabase.storage.createBucket(BUCKET, { public: true });
+      if (be) {
+        return NextResponse.json({ error: "Bucket creation failed", details: be.message }, { status: 500 });
+      }
+    }
+
+    const bytes = await file.arrayBuffer();
+    const { error } = await supabase.storage.from(BUCKET).upload(filename, bytes, {
       contentType: file.type || "image/jpeg",
       upsert: false,
     });
-
-    if (error?.message?.toLowerCase().includes("bucket")) {
-      const { error: bucketError } = await supabase.storage.createBucket(BUCKET, {
-        public: true,
-      });
-      if (bucketError) {
-        return NextResponse.json({ error: "Bucket creation failed", details: bucketError.message }, { status: 500 });
-      }
-      ({ error } = await supabase.storage.from(BUCKET).upload(filename, file, {
-        contentType: file.type || "image/jpeg",
-        upsert: false,
-      }));
-    }
 
     if (error) {
       return NextResponse.json({ error: "Upload failed", details: error.message }, { status: 500 });
