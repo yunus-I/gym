@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase";
+
+const BUCKET = "gym-uploads";
 
 export async function POST(req: Request) {
   try {
@@ -13,17 +14,36 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to public/uploads
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    // Sanitize filename to avoid weird character issues
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `${Date.now()}-${sanitizedName}`;
-    const filePath = path.join(uploadDir, filename);
-    await writeFile(filePath, buffer);
 
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    let { error } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .upload(filename, buffer, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+
+    if (error?.message?.includes("bucket")) {
+      const { error: bucketError } = await supabaseAdmin.storage.createBucket(BUCKET, {
+        public: true,
+      });
+      if (bucketError) {
+        return NextResponse.json({ error: "Bucket creation failed" }, { status: 500 });
+      }
+      ({ error } = await supabaseAdmin.storage.from(BUCKET).upload(filename, buffer, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      }));
+    }
+
+    if (error) {
+      console.error("Supabase upload error:", error);
+      return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+    }
+
+    const { data: urlData } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(filename);
+    return NextResponse.json({ url: urlData.publicUrl });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
