@@ -1,5 +1,5 @@
 import createIntlMiddleware from "next-intl/middleware";
-import { getToken } from "next-auth/jwt";
+import { getToken, decode } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
 import { getLocaleFromPath, hasManagerAccess, isManagerOnlyPath } from "./lib/access";
@@ -19,7 +19,16 @@ export default async function proxy(req: NextRequest): Promise<NextResponse | Re
     return intlMiddleware(req);
   }
 
-  const token = await getToken({ req });
+  const secret = process.env.NEXTAUTH_SECRET;
+  const cookieName = process.env.NODE_ENV === "production"
+    ? "__Secure-next-auth.session-token"
+    : "next-auth.session-token";
+
+  const rawToken = req.cookies.get(cookieName)?.value;
+  const token = rawToken
+    ? await decode({ token: rawToken, secret }).catch(() => null)
+    : null;
+
   const locale = getLocaleFromPath(req.nextUrl.pathname);
 
   if (!token) {
