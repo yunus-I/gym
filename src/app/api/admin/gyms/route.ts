@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { isSuperAdmin } from "@/lib/access";
+import { jsonError, requireSuperAdmin } from "@/lib/api";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || !isSuperAdmin(session.user.role))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const guard = await requireSuperAdmin();
+  if (guard instanceof NextResponse) return guard;
 
   const gyms = await prisma.gym.findMany({
     orderBy: { createdAt: "desc" },
@@ -21,9 +18,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !isSuperAdmin(session.user.role))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const guard = await requireSuperAdmin();
+  if (guard instanceof NextResponse) return guard;
 
   try {
     const { name, location, managerEmail, managerPassword, managerName } = (await req.json()) as {
@@ -35,7 +31,7 @@ export async function POST(req: Request) {
     };
 
     if (!name || !managerEmail || !managerPassword) {
-      return NextResponse.json({ error: "Gym name, manager email, and password are required" }, { status: 400 });
+      return jsonError("Gym name, manager email, and password are required", 400);
     }
 
     const gym = await prisma.gym.create({
@@ -65,6 +61,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(gym);
   } catch {
-    return NextResponse.json({ error: "Failed to create gym" }, { status: 500 });
+    return jsonError("Failed to create gym", 500);
   }
 }

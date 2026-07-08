@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { startOfDay, endOfDay } from "date-fns";
+import { jsonError, requireAuth } from "@/lib/api";
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const session = await requireAuth();
+    if (session instanceof NextResponse) return session;
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query")?.trim();
@@ -77,19 +76,19 @@ export async function GET(req: Request) {
   } catch (error: unknown) {
     console.error("GET /api/check-in error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: "Internal Server Error", message }, { status: 500 });
+    return jsonError("Internal Server Error", 500, { message });
   }
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAuth();
+  if (session instanceof NextResponse) return session;
 
   try {
     const { memberId } = (await req.json()) as { memberId?: string };
 
     if (!memberId) {
-      return NextResponse.json({ error: "Member is required" }, { status: 400 });
+      return jsonError("Member is required", 400);
     }
 
     const { gymId } = session.user;
@@ -100,12 +99,12 @@ export async function POST(req: Request) {
     });
 
     if (!member) {
-      return NextResponse.json({ error: "Member not found" }, { status: 404 });
+      return jsonError("Member not found", 404);
     }
 
     const today = new Date();
     if (!member.expiryDate || member.expiryDate < startOfDay(today)) {
-      return NextResponse.json({ error: "Subscription expired" }, { status: 400 });
+      return jsonError("Subscription expired", 400);
     }
 
     const existingAttendance = await prisma.attendance.findFirst({
@@ -119,7 +118,7 @@ export async function POST(req: Request) {
     });
 
     if (existingAttendance) {
-      return NextResponse.json({ error: "Already checked in today" }, { status: 400 });
+      return jsonError("Already checked in today", 400);
     }
 
     const attendance = await prisma.attendance.create({
@@ -128,6 +127,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(attendance);
   } catch {
-    return NextResponse.json({ error: "Failed to record check-in" }, { status: 500 });
+    return jsonError("Failed to record check-in", 500);
   }
 }

@@ -17,7 +17,8 @@ import {
   UserX,
   ArrowUpRight
 } from "lucide-react";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { formatDate } from "@/lib/format";
 
 interface DashboardStats {
   totalMembers: number;
@@ -331,7 +332,7 @@ export default function DashboardPage() {
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold text-red-500">
                       {member.expiryDate
-                        ? format(new Date(member.expiryDate), "MMM dd")
+                        ? formatDate(member.expiryDate, "MMM dd")
                         : "No plan"}
                     </p>
                     {daysOverdue !== null && daysOverdue >= 0 && (
@@ -459,7 +460,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] font-mono text-zinc-400 block font-semibold">{format(new Date(checkIn.checkIn), "HH:mm")}</span>
+                      <span className="text-[10px] font-mono text-zinc-400 block font-semibold">{formatDate(checkIn.checkIn, "HH:mm")}</span>
                       <span className={`inline-block text-[9px] uppercase tracking-wider font-black mt-1.5 ${isExpired ? 'text-red-400' : 'text-[#00FF88]'}`}>
                         {isExpired ? "Expired" : "Active"}
                       </span>

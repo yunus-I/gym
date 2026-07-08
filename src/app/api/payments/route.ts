@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { addDays, isAfter } from "date-fns";
+import { jsonError, requireAuth } from "@/lib/api";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAuth();
+  if (session instanceof NextResponse) return session;
 
   try {
     const { memberId, planId, amount, paymentMethod, notes } = (await req.json()) as {
@@ -18,14 +17,14 @@ export async function POST(req: Request) {
     };
 
     if (!memberId || !planId || amount === undefined || !paymentMethod) {
-      return NextResponse.json({ error: "Missing payment details" }, { status: 400 });
+      return jsonError("Missing payment details", 400);
     }
 
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     const member = await prisma.member.findUnique({ where: { id: memberId } });
 
     if (!plan || !member) {
-      return NextResponse.json({ error: "Invalid plan or member" }, { status: 400 });
+      return jsonError("Invalid plan or member", 400);
     }
 
     // Calculate new expiry date
@@ -64,13 +63,13 @@ export async function POST(req: Request) {
     return NextResponse.json(payment);
   } catch (error) {
     console.error("Payment error:", error);
-    return NextResponse.json({ error: "Failed to record payment" }, { status: 500 });
+    return jsonError("Failed to record payment", 500);
   }
 }
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAuth();
+  if (session instanceof NextResponse) return session;
 
   const { searchParams } = new URL(req.url);
   const memberId = searchParams.get("memberId");

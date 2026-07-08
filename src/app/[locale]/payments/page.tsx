@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Download, CreditCard, Loader2, Filter, Search, DollarSign } from "lucide-react";
 import { format } from "date-fns";
+import { formatDate, formatETB } from "@/lib/format";
 
 interface PaymentRecord {
   id: string;
@@ -55,7 +56,7 @@ export default function PaymentsPage() {
       p.member.memberId,
       p.plan.name,
       p.amount,
-      format(new Date(p.paymentDate), "yyyy-MM-dd"),
+      formatDate(p.paymentDate, "yyyy-MM-dd"),
       p.paymentMethod
     ]);
     const csvContent =
@@ -222,12 +223,12 @@ export default function PaymentsPage() {
 
                         {/* Amount */}
                         <td className="py-4 px-4 text-xs font-black text-[#00FF88] font-mono">
-                          {p.amount.toLocaleString()} ETB
+                          {formatETB(p.amount)}
                         </td>
 
                         {/* Date */}
                         <td className="py-4 px-4 text-xs font-medium text-zinc-400 font-mono">
-                          {format(new Date(p.paymentDate), "MMM dd, yyyy")}
+                          {formatDate(p.paymentDate)}
                         </td>
 
                         {/* Payment Method Badge */}
