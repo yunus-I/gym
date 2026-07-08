@@ -51,32 +51,36 @@ export async function POST(req: Request) {
     const registrationDate = new Date();
     const expiryDate = addDays(registrationDate, plan.duration);
 
-    // 3. Create Member
-    const member = await prisma.member.create({
-      data: {
-        memberId: nextMemberId,
-        fullName,
-        phoneNumber,
-        photoUrl,
-        age: age ? parseInt(age) : null,
-        gender,
-        gymId,
-        currentPlanId: planId,
-        expiryDate,
-        registrationDate,
-      },
-    });
+    // 3. Create Member and record initial payment atomically so a failure
+    //    on either write does not leave a member without a payment record.
+    const member = await prisma.$transaction(async (tx) => {
+      const createdMember = await tx.member.create({
+        data: {
+          memberId: nextMemberId,
+          fullName,
+          phoneNumber,
+          photoUrl,
+          age: age ? parseInt(age) : null,
+          gender,
+          gymId,
+          currentPlanId: planId,
+          expiryDate,
+          registrationDate,
+        },
+      });
 
-    // 4. Record initial payment
-    await prisma.payment.create({
-      data: {
-        amount: plan.price,
-        paymentMethod: "Cash", // Default to Cash for now
-        memberId: member.id,
-        planId: plan.id,
-        startDate: registrationDate,
-        expiryDate: expiryDate,
-      },
+      await tx.payment.create({
+        data: {
+          amount: plan.price,
+          paymentMethod: "Cash", // Default to Cash for now
+          memberId: createdMember.id,
+          planId: plan.id,
+          startDate: registrationDate,
+          expiryDate: expiryDate,
+        },
+      });
+
+      return createdMember;
     });
 
     return NextResponse.json(member);

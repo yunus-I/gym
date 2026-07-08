@@ -14,7 +14,8 @@ export async function POST(req: Request) {
     const dataUrl = `data:${mime};base64,${base64}`;
 
     return NextResponse.json({ url: dataUrl });
-  } catch (error: any) {
-    return NextResponse.json({ error: "Upload failed", details: error?.message || String(error) }, { status: 500 });
+  } catch (error) {
+    console.error("POST /api/upload error:", error);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

@@ -37,9 +37,15 @@ export default function MembersDirectoryPage() {
     let cancelled = false;
 
     void fetch("/api/members")
-      .then((res) => res.json())
-      .then((data: MemberListItem[]) => {
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load members: ${res.status}`);
+        return res.json() as Promise<MemberListItem[]>;
+      })
+      .then((data) => {
         if (!cancelled) setMembers(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load members:", error);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

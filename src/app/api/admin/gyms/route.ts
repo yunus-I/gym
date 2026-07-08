@@ -38,20 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Gym name, manager email, and password are required" }, { status: 400 });
     }
 
-    const gym = await prisma.gym.create({
-      data: { name, location },
-    });
-
     const hashedPassword = await bcrypt.hash(managerPassword, 10);
-    await prisma.user.create({
-      data: {
-        email: managerEmail,
-        password: hashedPassword,
-        name: managerName || "Gym Manager",
-        role: "MANAGER",
-        gymId: gym.id,
-      },
-    });
 
     const defaultPlans = [
       { name: "Monthly", duration: 30, price: 1000 },
@@ -59,12 +46,31 @@ export async function POST(req: Request) {
       { name: "Yearly", duration: 365, price: 10000 },
     ];
 
-    for (const plan of defaultPlans) {
-      await prisma.plan.create({ data: { ...plan, gymId: gym.id } });
-    }
+    const gym = await prisma.$transaction(async (tx) => {
+      const createdGym = await tx.gym.create({
+        data: { name, location },
+      });
+
+      await tx.user.create({
+        data: {
+          email: managerEmail,
+          password: hashedPassword,
+          name: managerName || "Gym Manager",
+          role: "MANAGER",
+          gymId: createdGym.id,
+        },
+      });
+
+      await tx.plan.createMany({
+        data: defaultPlans.map((plan) => ({ ...plan, gymId: createdGym.id })),
+      });
+
+      return createdGym;
+    });
 
     return NextResponse.json(gym);
-  } catch {
+  } catch (error) {
+    console.error("POST /api/admin/gyms error:", error);
     return NextResponse.json({ error: "Failed to create gym" }, { status: 500 });
   }
 }

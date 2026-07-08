@@ -72,9 +72,11 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const p = useTranslations("Payments");
   const checkIn = useTranslations("CheckIn");
+  const common = useTranslations("Common");
   const router = useRouter();
 
   const [member, setMember] = useState<MemberProfile | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [plans, setPlans] = useState<PlanOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
@@ -84,15 +86,29 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
     let cancelled = false;
 
     void Promise.all([
-      fetch(`/api/members/${id}`).then((res) => res.json() as Promise<MemberProfile>),
-      fetch("/api/plans").then((res) => res.json() as Promise<PlanOption[]>),
-    ]).then(([memberData, plansData]) => {
-      if (!cancelled) {
-        setMember(memberData);
-        setPlans(plansData);
-        setLoading(false);
-      }
-    });
+      fetch(`/api/members/${id}`),
+      fetch("/api/plans"),
+    ])
+      .then(async ([memberRes, plansRes]) => {
+        if (!memberRes.ok || !plansRes.ok) {
+          throw new Error(`Failed to load member (member: ${memberRes.status}, plans: ${plansRes.status})`);
+        }
+        const [memberData, plansData] = await Promise.all([
+          memberRes.json() as Promise<MemberProfile>,
+          plansRes.json() as Promise<PlanOption[]>,
+        ]);
+        if (!cancelled) {
+          setMember(memberData);
+          setPlans(plansData);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load member profile:", error);
+        if (!cancelled) setLoadError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => {
       cancelled = true;
@@ -100,7 +116,11 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   }, [id]);
 
   const refreshMember = async () => {
-    const refreshedMember = (await fetch(`/api/members/${id}`).then((res) => res.json())) as MemberProfile;
+    const res = await fetch(`/api/members/${id}`);
+    if (!res.ok) {
+      throw new Error(`Failed to refresh member: ${res.status}`);
+    }
+    const refreshedMember = (await res.json()) as MemberProfile;
     setMember(refreshedMember);
   };
 
@@ -120,24 +140,44 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
       notes: formData.get("notes"),
     };
 
-    const res = await fetch("/api/payments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    try {
+      const res = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-    if (res.ok) {
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? `Payment failed: ${res.status}`);
+      }
+
       setIsPaymentDialogOpen(false);
       await refreshMember();
+    } catch (error) {
+      console.error("Failed to record payment:", error);
+      alert(error instanceof Error ? error.message : common("error"));
+    } finally {
+      setSubmittingPayment(false);
     }
-
-    setSubmittingPayment(false);
   };
 
-  if (loading || !member) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950">
         <Loader2 className="w-12 h-12 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (loadError || !member) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50 dark:bg-zinc-950">
+        <p className="text-slate-600 dark:text-zinc-400">{common("error")}</p>
+        <Button onClick={() => router.push("/members")} variant="outline">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Directory
+        </Button>
       </div>
     );
   }

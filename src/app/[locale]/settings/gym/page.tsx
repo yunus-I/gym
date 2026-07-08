@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, MapPin, Save, Loader2, CheckCircle2 } from "lucide-react";
+import { Building2, MapPin, Save, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface GymProfile {
@@ -23,15 +23,22 @@ export default function GymProfilePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     void fetch("/api/gym")
-      .then((res) => res.json())
-      .then((data: GymProfile | null) => {
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load gym profile: ${res.status}`);
+        return res.json() as Promise<GymProfile | null>;
+      })
+      .then((data) => {
         if (!cancelled) setGym(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load gym profile:", error);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -46,43 +53,54 @@ export default function GymProfilePage() {
     e.preventDefault();
     setSubmitting(true);
     setSuccess(false);
+    setError(false);
     const formData = new FormData(e.currentTarget);
-    let logoUrl = gym?.logoUrl ?? null;
-    const logoFile = formData.get("logoFile") as File;
-    if (logoFile && logoFile.size > 0) {
-      const uploadData = new FormData();
-      uploadData.append("file", logoFile);
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: uploadData,
-      });
-      if (uploadRes.ok) {
+
+    try {
+      let logoUrl = gym?.logoUrl ?? null;
+      const logoFile = formData.get("logoFile") as File;
+      if (logoFile && logoFile.size > 0) {
+        const uploadData = new FormData();
+        uploadData.append("file", logoFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+        if (!uploadRes.ok) {
+          throw new Error(`Logo upload failed: ${uploadRes.status}`);
+        }
         const uploadResult = await uploadRes.json();
         logoUrl = uploadResult.url;
       }
-    }
 
-    const data = {
-      name: formData.get("name"),
-      location: formData.get("location"),
-      logoUrl: logoUrl,
-    };
+      const data = {
+        name: formData.get("name"),
+        location: formData.get("location"),
+        logoUrl: logoUrl,
+      };
 
-    const res = await fetch("/api/gym", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+      const res = await fetch("/api/gym", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-    if (res.ok) {
+      if (!res.ok) {
+        throw new Error(`Failed to save gym profile: ${res.status}`);
+      }
+
       setSuccess(true);
       // Update local state to reflect new logo
       if (logoUrl) {
         setGym((prev) => prev ? { ...prev, logoUrl } : null);
       }
       setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to save gym profile:", err);
+      setError(true);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   if (loading) return (
@@ -107,6 +125,13 @@ export default function GymProfilePage() {
           <div className="bg-emerald-900/20 text-emerald-400 p-4 rounded-2xl flex items-center gap-3 border border-emerald-500/20">
             <CheckCircle2 />
             <span className="font-bold">{t("success")}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-900/20 text-red-400 p-4 rounded-2xl flex items-center gap-3 border border-red-500/20">
+            <AlertCircle />
+            <span className="font-bold">Failed to save changes. Please try again.</span>
           </div>
         )}
 

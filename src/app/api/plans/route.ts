@@ -50,7 +50,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(plan);
-  } catch {
+  } catch (error) {
+    console.error("POST /api/plans error:", error);
     return NextResponse.json({ error: "Failed to create plan" }, { status: 500 });
   }
 }
@@ -88,7 +89,8 @@ export async function PUT(req: Request) {
     });
 
     return NextResponse.json(plan);
-  } catch {
+  } catch (error) {
+    console.error("PUT /api/plans error:", error);
     return NextResponse.json({ error: "Failed to update plan" }, { status: 500 });
   }
 }
