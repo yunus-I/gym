@@ -77,6 +77,13 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Missing plan details" }, { status: 400 });
     }
 
+    const { gymId } = session.user;
+
+    const existing = await prisma.plan.findFirst({ where: { id, gymId } });
+    if (!existing) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+    }
+
     const plan = await prisma.plan.update({
       where: { id },
       data: {

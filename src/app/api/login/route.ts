@@ -3,9 +3,13 @@ import bcrypt from "bcryptjs";
 import { encode } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-const secret = process.env.NEXTAUTH_SECRET || "fallback-dev-secret";
-
 export async function POST(req: NextRequest) {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    console.error("NEXTAUTH_SECRET is not set");
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
+
   try {
     const formData = await req.formData();
     const email = formData.get("email") as string;
