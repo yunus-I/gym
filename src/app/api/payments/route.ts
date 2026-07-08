@@ -21,8 +21,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing payment details" }, { status: 400 });
     }
 
-    const plan = await prisma.plan.findUnique({ where: { id: planId } });
-    const member = await prisma.member.findUnique({ where: { id: memberId } });
+    const { gymId } = session.user;
+
+    const plan = await prisma.plan.findFirst({ where: { id: planId, gymId } });
+    const member = await prisma.member.findFirst({ where: { id: memberId, gymId } });
 
     if (!plan || !member) {
       return NextResponse.json({ error: "Invalid plan or member" }, { status: 400 });
