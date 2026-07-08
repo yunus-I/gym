@@ -127,7 +127,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(attendance);
-  } catch {
+  } catch (error) {
+    console.error("POST /api/check-in error:", error);
     return NextResponse.json({ error: "Failed to record check-in" }, { status: 500 });
   }
 }

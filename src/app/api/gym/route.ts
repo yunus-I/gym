@@ -43,7 +43,8 @@ export async function PUT(req: Request) {
     });
 
     return NextResponse.json(gym);
-  } catch {
+  } catch (error) {
+    console.error("PUT /api/gym error:", error);
     return NextResponse.json({ error: "Failed to update gym profile" }, { status: 500 });
   }
 }

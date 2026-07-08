@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2, CheckCircle2 } from "lucide-react";
+import { Camera, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface PlanOption {
   id: string;
@@ -36,19 +36,26 @@ export default function RegisterMemberPage() {
   });
 
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     void fetch("/api/plans")
-      .then((res) => res.json())
-      .then((data: PlanOption[]) => {
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load plans: ${res.status}`);
+        return res.json() as Promise<PlanOption[]>;
+      })
+      .then((data) => {
         if (cancelled) return;
 
         setPlans(data);
         if (data.length > 0) {
           setFormData((prev) => ({ ...prev, planId: data[0].id }));
         }
+      })
+      .catch((err) => {
+        console.error("Failed to load plans:", err);
       });
 
     return () => {
@@ -79,10 +86,12 @@ export default function RegisterMemberPage() {
         const result = (await res.json()) as { url: string };
         setFormData((prev) => ({ ...prev, photoUrl: result.url }));
       } else {
-        console.error("Upload failed");
+        console.error("Upload failed:", res.status);
+        setError("Photo upload failed. Please try a different image.");
       }
     } catch (err) {
       console.error(err);
+      setError("Photo upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -91,6 +100,7 @@ export default function RegisterMemberPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
       const res = await fetch("/api/members", {
@@ -99,12 +109,16 @@ export default function RegisterMemberPage() {
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => router.push("/members"), 2000);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? `Registration failed: ${res.status}`);
       }
-    } catch (error) {
-      console.error(error);
+
+      setSuccess(true);
+      setTimeout(() => router.push("/members"), 2000);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : common("error"));
     } finally {
       setLoading(false);
     }
@@ -140,6 +154,13 @@ export default function RegisterMemberPage() {
             {common("cancel")}
           </Button>
         </div>
+
+        {error && (
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-2xl flex items-center gap-3 border border-red-200 dark:border-red-500/20">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span className="font-medium">{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Photo Section */}

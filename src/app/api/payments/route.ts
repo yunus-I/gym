@@ -38,27 +38,31 @@ export async function POST(req: Request) {
     
     const newExpiryDate = addDays(baseDate, plan.duration);
 
-    // Create Payment Record
-    const payment = await prisma.payment.create({
-      data: {
-        amount: Number(amount),
-        paymentMethod,
-        notes,
-        memberId,
-        planId,
-        startDate: baseDate,
-        expiryDate: newExpiryDate,
-      },
-    });
+    // Record the payment and update the member's subscription atomically so a
+    // failure on either write cannot leave them out of sync.
+    const payment = await prisma.$transaction(async (tx) => {
+      const createdPayment = await tx.payment.create({
+        data: {
+          amount: Number(amount),
+          paymentMethod,
+          notes,
+          memberId,
+          planId,
+          startDate: baseDate,
+          expiryDate: newExpiryDate,
+        },
+      });
 
-    // Update Member
-    await prisma.member.update({
-      where: { id: memberId },
-      data: {
-        currentPlanId: planId,
-        expiryDate: newExpiryDate,
-        status: "ACTIVE",
-      },
+      await tx.member.update({
+        where: { id: memberId },
+        data: {
+          currentPlanId: planId,
+          expiryDate: newExpiryDate,
+          status: "ACTIVE",
+        },
+      });
+
+      return createdPayment;
     });
 
     return NextResponse.json(payment);

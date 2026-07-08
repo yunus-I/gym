@@ -40,9 +40,15 @@ export default function GymDetailPage() {
   const [adding, setAdding] = useState(false);
 
   const fetchGym = async () => {
-    const res = await fetch(`/api/admin/gyms/${gymId}`);
-    if (res.ok) setGym(await res.json());
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/admin/gyms/${gymId}`);
+      if (!res.ok) throw new Error(`Failed to load gym: ${res.status}`);
+      setGym(await res.json());
+    } catch (error) {
+      console.error("Failed to load gym:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { void fetchGym(); }, [gymId]);
@@ -50,23 +56,37 @@ export default function GymDetailPage() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdding(true);
-    const res = await fetch(`/api/admin/gyms/${gymId}/users`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userForm),
-    });
-    if (res.ok) {
+    try {
+      const res = await fetch(`/api/admin/gyms/${gymId}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userForm),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? `Failed to add staff member: ${res.status}`);
+      }
       setShowAddUser(false);
       setUserForm({ email: "", password: "", name: "", role: "TICKER" });
       void fetchGym();
+    } catch (error) {
+      console.error("Failed to add staff member:", error);
+      alert(error instanceof Error ? error.message : "Failed to add staff member");
+    } finally {
+      setAdding(false);
     }
-    setAdding(false);
   };
 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Remove this staff member?")) return;
-    await fetch(`/api/admin/gyms/${gymId}/users/${userId}`, { method: "DELETE" });
-    void fetchGym();
+    try {
+      const res = await fetch(`/api/admin/gyms/${gymId}/users/${userId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed to remove staff member: ${res.status}`);
+      void fetchGym();
+    } catch (error) {
+      console.error("Failed to remove staff member:", error);
+      alert("Failed to remove staff member. Please try again.");
+    }
   };
 
   if (loading) return (

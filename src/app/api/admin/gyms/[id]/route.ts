@@ -29,12 +29,21 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
 
-  await prisma.payment.deleteMany({ where: { member: { gymId: id } } });
-  await prisma.attendance.deleteMany({ where: { member: { gymId: id } } });
-  await prisma.member.deleteMany({ where: { gymId: id } });
-  await prisma.plan.deleteMany({ where: { gymId: id } });
-  await prisma.user.deleteMany({ where: { gymId: id } });
-  await prisma.gym.delete({ where: { id } });
+  try {
+    // Cascade the deletes in a single transaction so a mid-way failure cannot
+    // leave the gym partially deleted with orphaned records.
+    await prisma.$transaction([
+      prisma.payment.deleteMany({ where: { member: { gymId: id } } }),
+      prisma.attendance.deleteMany({ where: { member: { gymId: id } } }),
+      prisma.member.deleteMany({ where: { gymId: id } }),
+      prisma.plan.deleteMany({ where: { gymId: id } }),
+      prisma.user.deleteMany({ where: { gymId: id } }),
+      prisma.gym.delete({ where: { id } }),
+    ]);
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE /api/admin/gyms/[id] error:", error);
+    return NextResponse.json({ error: "Failed to delete gym" }, { status: 500 });
+  }
 }

@@ -166,9 +166,15 @@ export default function DashboardPage() {
     let cancelled = false;
 
     void fetch("/api/dashboard")
-      .then((res) => res.json())
-      .then((result: DashboardResponse) => {
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load dashboard: ${res.status}`);
+        return res.json() as Promise<DashboardResponse>;
+      })
+      .then((result) => {
         if (!cancelled) setData(result);
+      })
+      .catch((error) => {
+        console.error("Failed to load dashboard:", error);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

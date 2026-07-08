@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isSuperAdmin } from "@/lib/access";
 import bcrypt from "bcryptjs";
+import { Role } from "@prisma/client";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -24,19 +25,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
+    const resolvedRole =
+      role && (Object.values(Role) as string[]).includes(role)
+        ? (role as Role)
+        : Role.TICKER;
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: name || "Staff",
-        role: (role as any) || "TICKER",
+        role: resolvedRole,
         gymId: id,
       },
     });
 
     return NextResponse.json(user);
-  } catch {
+  } catch (error) {
+    console.error("POST /api/admin/gyms/[id]/users error:", error);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 }

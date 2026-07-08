@@ -26,9 +26,15 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false);
 
   const fetchGyms = async () => {
-    const res = await fetch("/api/admin/gyms");
-    if (res.ok) setGyms(await res.json());
-    setLoading(false);
+    try {
+      const res = await fetch("/api/admin/gyms");
+      if (!res.ok) throw new Error(`Failed to load gyms: ${res.status}`);
+      setGyms(await res.json());
+    } catch (error) {
+      console.error("Failed to load gyms:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { void fetchGyms(); }, []);
@@ -36,23 +42,37 @@ export default function AdminPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
-    const res = await fetch("/api/admin/gyms", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/admin/gyms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? `Failed to create gym: ${res.status}`);
+      }
       setShowCreate(false);
       setForm({ name: "", location: "", managerEmail: "", managerPassword: "", managerName: "" });
       void fetchGyms();
+    } catch (error) {
+      console.error("Failed to create gym:", error);
+      alert(error instanceof Error ? error.message : "Failed to create gym");
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete "${name}" and all its data? This cannot be undone.`)) return;
-    await fetch(`/api/admin/gyms/${id}`, { method: "DELETE" });
-    void fetchGyms();
+    try {
+      const res = await fetch(`/api/admin/gyms/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed to delete gym: ${res.status}`);
+      void fetchGyms();
+    } catch (error) {
+      console.error("Failed to delete gym:", error);
+      alert("Failed to delete gym. Please try again.");
+    }
   };
 
   if (loading) return (
