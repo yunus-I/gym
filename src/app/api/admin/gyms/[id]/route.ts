@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { isSuperAdmin } from "@/lib/access";
+import { jsonError, requireSuperAdmin } from "@/lib/api";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || !isSuperAdmin(session.user.role))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const guard = await requireSuperAdmin();
+  if (guard instanceof NextResponse) return guard;
 
   const { id } = await params;
   const gym = await prisma.gym.findUnique({
@@ -18,14 +15,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     },
   });
 
-  if (!gym) return NextResponse.json({ error: "Gym not found" }, { status: 404 });
+  if (!gym) return jsonError("Gym not found", 404);
   return NextResponse.json(gym);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || !isSuperAdmin(session.user.role))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const guard = await requireSuperAdmin();
+  if (guard instanceof NextResponse) return guard;
 
   const { id } = await params;
 

@@ -18,7 +18,8 @@ import {
   Clock,
   Save,
 } from "lucide-react";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { formatDate, formatETB } from "@/lib/format";
 import {
   Table,
   TableBody,
@@ -246,7 +247,7 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Subscription Ends</p>
             <p className="text-xl font-black text-slate-900 dark:text-white">
-              {member.expiryDate ? format(new Date(member.expiryDate), "MMM dd, yyyy") : "N/A"}
+              {member.expiryDate ? formatDate(member.expiryDate) : "N/A"}
             </p>
           </Card>
 
@@ -273,7 +274,7 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
               <CreditCard className="w-6 h-6" />
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Paid</p>
-            <p className="text-xl font-black text-slate-900 dark:text-white">{totalPaid.toLocaleString()} ETB</p>
+            <p className="text-xl font-black text-slate-900 dark:text-white">{formatETB(totalPaid)}</p>
           </Card>
         </div>
 
@@ -300,10 +301,10 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
                     member.attendances.map((attendance) => (
                       <TableRow key={attendance.id} className="border-slate-50 dark:border-zinc-800/50">
                         <TableCell className="px-8 py-4 font-bold text-slate-700 dark:text-zinc-300">
-                          {format(new Date(attendance.checkIn), "MMM dd, yyyy")}
+                          {formatDate(attendance.checkIn)}
                         </TableCell>
                         <TableCell className="text-right px-8 font-medium text-slate-400">
-                          {format(new Date(attendance.checkIn), "HH:mm")}
+                          {formatDate(attendance.checkIn, "HH:mm")}
                         </TableCell>
                       </TableRow>
                     ))
@@ -336,11 +337,11 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
                     member.payments.map((payment) => (
                       <TableRow key={payment.id} className="border-slate-50 dark:border-zinc-800/50">
                         <TableCell className="px-8 py-4 font-bold text-slate-700 dark:text-zinc-300">
-                          {format(new Date(payment.paymentDate), "MMM dd, yyyy")}
+                          {formatDate(payment.paymentDate)}
                         </TableCell>
                         <TableCell className="font-medium text-slate-400">{payment.plan?.name}</TableCell>
                         <TableCell className="text-right px-8 font-black text-emerald-600">
-                          {payment.amount.toLocaleString()} ETB
+                          {formatETB(payment.amount)}
                         </TableCell>
                       </TableRow>
                     ))

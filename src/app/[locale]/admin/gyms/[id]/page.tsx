@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { ArrowLeft, Plus, Trash2, Loader2, Users, Building2, CreditCard } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/format";
 
 interface GymUser {
   id: string;
@@ -91,7 +91,7 @@ export default function GymDetailPage() {
         <div>
           <span className="text-[10px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FF6B00]/10 px-2.5 py-1 rounded">Gym Details</span>
           <h1 className="text-3xl font-black text-white mt-3 uppercase tracking-tight">{gym.name}</h1>
-          <p className="text-zinc-400 text-xs mt-1 font-medium">{gym.location || "No location"} · Created {format(new Date(gym.createdAt), "MMM dd, yyyy")}</p>
+          <p className="text-zinc-400 text-xs mt-1 font-medium">{gym.location || "No location"} · Created {formatDate(gym.createdAt)}</p>
         </div>
       </div>
 
@@ -185,7 +185,7 @@ export default function GymDetailPage() {
                 <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${user.role === "MANAGER" ? "bg-[#FF6B00]/10 text-[#FF6B00]" : user.role === "ADMIN" ? "bg-purple-500/10 text-purple-400" : "bg-zinc-500/10 text-zinc-400"}`}>
                   {user.role}
                 </span>
-                <span className="text-[9px] text-zinc-600 hidden md:block">Joined {format(new Date(user.createdAt), "MMM dd")}</span>
+                <span className="text-[9px] text-zinc-600 hidden md:block">Joined {formatDate(user.createdAt, "MMM dd")}</span>
                 <button onClick={() => handleDeleteUser(user.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors border-none cursor-pointer" title="Remove user">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

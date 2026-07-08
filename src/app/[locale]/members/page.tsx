@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, UserPlus, Eye, Loader2, Filter } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/format";
 
 interface MemberListItem {
   id: string;
@@ -203,12 +203,12 @@ export default function MembersDirectoryPage() {
 
                           {/* Join Date */}
                           <td className="py-4 px-4 text-xs font-medium text-zinc-400 font-mono">
-                            {member.registrationDate ? format(new Date(member.registrationDate), 'MMM dd, yyyy') : 'N/A'}
+                            {member.registrationDate ? formatDate(member.registrationDate) : 'N/A'}
                           </td>
 
                           {/* Expiry Date */}
                           <td className="py-4 px-4 text-xs font-medium text-zinc-400 font-mono">
-                            {member.expiryDate ? format(new Date(member.expiryDate), 'MMM dd, yyyy') : 'N/A'}
+                            {member.expiryDate ? formatDate(member.expiryDate) : 'N/A'}
                           </td>
 
                           {/* Status Badge */}

@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { isSuperAdmin } from "@/lib/access";
+import { jsonError, requireSuperAdmin } from "@/lib/api";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || !isSuperAdmin(session.user.role))
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const guard = await requireSuperAdmin();
+  if (guard instanceof NextResponse) return guard;
 
   const { id } = await params;
 
@@ -21,7 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     };
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+      return jsonError("Email and password are required", 400);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,6 +34,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json(user);
   } catch {
-    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    return jsonError("Failed to create user", 500);
   }
 }

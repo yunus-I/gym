@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { addDays } from "date-fns";
-import { hasManagerAccess } from "@/lib/access";
+import { jsonError, requireAuth, requireManager } from "@/lib/api";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!hasManagerAccess(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const session = await requireManager();
+  if (session instanceof NextResponse) return session;
 
   try {
     const data = (await req.json()) as {
@@ -28,7 +20,7 @@ export async function POST(req: Request) {
     const { gymId } = session.user;
 
     if (!fullName || !planId) {
-      return NextResponse.json({ error: "Full name and plan are required" }, { status: 400 });
+      return jsonError("Full name and plan are required", 400);
     }
 
     // 1. Generate numeric Member ID (unique per gym)
@@ -45,7 +37,7 @@ export async function POST(req: Request) {
     });
 
     if (!plan) {
-      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+      return jsonError("Invalid plan", 400);
     }
 
     const registrationDate = new Date();
@@ -82,16 +74,13 @@ export async function POST(req: Request) {
     return NextResponse.json(member);
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json({ error: "Failed to register member" }, { status: 500 });
+    return jsonError("Failed to register member", 500);
   }
 }
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const session = await requireAuth();
+  if (session instanceof NextResponse) return session;
 
   const { gymId } = session.user;
 

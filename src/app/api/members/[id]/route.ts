@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { jsonError, requireAuth } from "@/lib/api";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAuth();
+  if (session instanceof NextResponse) return session;
 
   const { id } = await params;
   const { gymId } = session.user;
@@ -25,7 +24,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   });
 
   if (!member) {
-    return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    return jsonError("Member not found", 404);
   }
 
   return NextResponse.json(member);

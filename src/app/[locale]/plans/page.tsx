@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { formatETB } from "@/lib/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,7 +217,7 @@ export default function PlansPage() {
                           {plan.duration} days
                         </TableCell>
                         <TableCell className="font-black text-indigo-600 dark:text-indigo-400">
-                          {plan.price.toLocaleString()} ETB
+                          {formatETB(plan.price)}
                         </TableCell>
                         <TableCell>
                           <span className={`px-3 py-1 rounded-full text-xs font-bold ${

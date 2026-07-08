@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { hasManagerAccess } from "@/lib/access";
+import { jsonError, requireManager } from "@/lib/api";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!hasManagerAccess(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const session = await requireManager();
+  if (session instanceof NextResponse) return session;
 
   const { gymId } = session.user;
   const gym = await prisma.gym.findUnique({ where: { id: gymId } });
@@ -16,13 +13,8 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!hasManagerAccess(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const session = await requireManager();
+  if (session instanceof NextResponse) return session;
 
   try {
     const { name, location, logoUrl } = (await req.json()) as {
@@ -32,7 +24,7 @@ export async function PUT(req: Request) {
     };
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return jsonError("Name is required", 400);
     }
 
     const { gymId } = session.user;
@@ -44,6 +36,6 @@ export async function PUT(req: Request) {
 
     return NextResponse.json(gym);
   } catch {
-    return NextResponse.json({ error: "Failed to update gym profile" }, { status: 500 });
+    return jsonError("Failed to update gym profile", 500);
   }
 }

@@ -18,7 +18,7 @@ import {
   CreditCard,
   Hash,
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate, formatETB } from "@/lib/format";
 
 interface AttendanceSummary {
   id: string;
@@ -248,7 +248,7 @@ export default function CheckInPage() {
               {selectedMember.checkedInToday && (
                 <span className="mt-3.5 inline-flex items-center gap-1.5 text-[9px] font-black text-[#00FF88] bg-[#00FF88]/10 px-3 py-1 rounded-full uppercase tracking-wider">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  {t("alreadyCheckedIn")} · {selectedMember.todayCheckInTime && format(new Date(selectedMember.todayCheckInTime), "HH:mm")}
+                  {t("alreadyCheckedIn")} · {selectedMember.todayCheckInTime && formatDate(selectedMember.todayCheckInTime, "HH:mm")}
                 </span>
               )}
             </div>
@@ -268,7 +268,7 @@ export default function CheckInPage() {
                 label={t("expiryDate")}
                 value={
                   selectedMember.expiryDate
-                    ? format(new Date(selectedMember.expiryDate), "MMM dd, yyyy")
+                    ? formatDate(selectedMember.expiryDate)
                     : "—"
                 }
               />
@@ -283,7 +283,7 @@ export default function CheckInPage() {
                 label={t("lastVisit")}
                 value={
                   selectedMember.attendances[0]
-                    ? format(new Date(selectedMember.attendances[0].checkIn), "MMM dd, HH:mm")
+                    ? formatDate(selectedMember.attendances[0].checkIn, "MMM dd, HH:mm")
                     : "—"
                 }
               />
@@ -292,7 +292,7 @@ export default function CheckInPage() {
             {selectedMember.currentPlan && (
               <div className="text-[10px] font-bold text-zinc-400 p-3.5 rounded-xl bg-white/[0.01] border border-white/5 uppercase tracking-wider">
                 Plan Details: {selectedMember.currentPlan.name} · {selectedMember.currentPlan.duration} days ·{" "}
-                <span className="text-[#FF6B00]">{selectedMember.currentPlan.price.toLocaleString()} ETB</span>
+                <span className="text-[#FF6B00]">{formatETB(selectedMember.currentPlan.price)}</span>
               </div>
             )}
 

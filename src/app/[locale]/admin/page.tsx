@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Users, CreditCard, Plus, Trash2, Loader2, ShieldAlert } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/format";
 
 interface GymWithCounts {
   id: string;
@@ -138,7 +138,7 @@ export default function AdminPage() {
 
             <h3 className="text-lg font-bold text-white mb-1">{gym.name}</h3>
             <p className="text-[10px] text-zinc-500 font-mono mb-1">{gym.location || "No location set"}</p>
-            <p className="text-[10px] text-zinc-600">Created {format(new Date(gym.createdAt), "MMM dd, yyyy")}</p>
+            <p className="text-[10px] text-zinc-600">Created {formatDate(gym.createdAt)}</p>
 
             <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/5">
               <div className="flex items-center gap-1.5">
